@@ -8,4 +8,4 @@ export type MessageError = {
 	message: string
 }
 
-export type RequestError<T> = FieldError<T> | MessageError
+export type RequestError<T = never> = FieldError<T> | MessageError

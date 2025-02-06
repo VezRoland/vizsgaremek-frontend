@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 import type { Route } from "./+types/signin"
 import type { RequestError } from "~/lib/types"
@@ -45,7 +46,7 @@ export async function action({ request }: Route.ActionArgs) {
 			} as RequestError<z.infer<typeof signInSchema>>,
 			{
 				headers,
-				status: 400
+				status: 401
 			}
 		)
 
@@ -56,7 +57,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function SignIn() {
-	const actionData = useActionData<RequestError<any> | undefined>()
+	const actionData = useActionData<RequestError | undefined>()
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof signInSchema>>({
@@ -67,8 +68,8 @@ export default function SignIn() {
 		}
 	})
 
-	const onSubmit = (values: z.infer<typeof signInSchema>) => {
-		submit(values, {
+	const onSubmit = async (values: z.infer<typeof signInSchema>) => {
+		await submit(values, {
 			method: "POST",
 			encType: "application/json"
 		})
@@ -81,12 +82,16 @@ export default function SignIn() {
 			case "field":
 				Object.entries<string>(actionData.fields).forEach(([name, message]) => {
 					form.setError(name as "email" | "password", {
-						type: "manual",
+						type: "invalid",
 						message
 					})
 				})
 		}
 	}, [actionData])
+
+  useEffect(() => {
+    console.log(form.formState.errors)
+  }, [ form.formState.errors ])
 
 	return (
 		<Card className="w-full max-w-xl">
@@ -100,7 +105,7 @@ export default function SignIn() {
 			</CardHeader>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
-					<CardContent>
+					<CardContent className="flex flex-col gap-1.5">
 						<FormField
 							control={form.control}
 							name="email"
@@ -133,7 +138,16 @@ export default function SignIn() {
 						/>
 					</CardContent>
 					<CardFooter>
-						<Button className="w-full">Bejelentkezés</Button>
+						<Button
+							className="w-full"
+							type="submit"
+							disabled={form.formState.isSubmitting}
+						>
+							{form.formState.isSubmitting && (
+								<Loader2 className="animate-spin" />
+							)}
+							Bejelentkezés
+						</Button>
 					</CardFooter>
 				</form>
 			</Form>
