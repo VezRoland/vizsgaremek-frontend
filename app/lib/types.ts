@@ -1,11 +1,17 @@
 export type FieldError<T> = {
+  error: boolean,
 	type: "field"
 	fields: T
 }
 
 export type MessageError = {
-	type: "message"
-	message: string
+  error: boolean,
+	type: "message",
+  messageType: MessageErrorType, 
+	message: string,
+  description?: string
 }
 
-export type RequestError<T = never> = FieldError<T> | MessageError
+export type MessageErrorType = "error" | "warning" | "info" | "success"
+
+export type ServerResponse<T = never> = FieldError<T> | MessageError
