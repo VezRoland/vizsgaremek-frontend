@@ -1,12 +1,13 @@
+import { useEffect } from "react"
 import { useActionData, useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signUpOwnerSchema } from "~/schemas/auth"
+import { signUpEmployeeSchema } from "~/schemas/auth"
 import { handleServerResponse } from "~/lib/utils"
 
-import type { Route } from "./+types/signup-owner"
+import type { Route } from "./+types/signup-employee"
 import type { ServerResponse } from "~/types/response"
 import { UserRole, type Company } from "~/types/database"
 
@@ -29,10 +30,9 @@ import {
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { useEffect } from "react"
 
 export async function action({ request }: Route.ActionArgs) {
-	const fields = (await request.json()) as z.infer<typeof signUpOwnerSchema>
+	const fields = (await request.json()) as z.infer<typeof signUpEmployeeSchema>
 
 	const { supabase, headers } = createSupabaseServerClient(request)
 	const { data, error } = await supabase.auth.admin.createUser({
@@ -40,44 +40,55 @@ export async function action({ request }: Route.ActionArgs) {
 		password: fields.password,
 		user_metadata: {
 			name: fields.name,
-			role: UserRole.owner
+			role: UserRole.employee
 		},
 		email_confirm: true
 	})
 
-	if (error) {
-		if (error.code === "unexpected_failure") {
+  if (error) {
+    if (error.code === "email_exists") {
 			return Response.json(
 				{
 					error: true,
-					type: "message",
-					message: "Váratlan hiba történ. Próbálja újra!",
-					messageType: "error"
-				} as ServerResponse,
+					type: "field",
+					fields: {
+            email: "Már létezik felhasználó ilyen email címmel!"
+          },
+				} as ServerResponse<z.infer<typeof signUpEmployeeSchema>>,
 				{
 					headers,
 					status: 403
 				}
 			)
 		}
-	}
 
-	const res = await fetch(`${process.env.VITE_API_URL}/company`, {
-		method: "POST",
-		body: JSON.stringify({ name: fields.company_name })
-	})
-
-	if (res.status !== 201) {
-    await supabase.auth.admin.deleteUser(data.user!.id)
-    return Response.json(await res.json(), { headers })
+    return Response.json(
+      {
+        error: true,
+        type: "message",
+        message: "Váratlan hiba történ. Próbálja újra!",
+        messageType: "error"
+      } as ServerResponse,
+      {
+        headers,
+        status: 403
+      }
+    )
   }
+
+	const res = await fetch(`${process.env.VITE_API_URL}/company/${fields.code}`)
+
+	if (res.status !== 200) {
+		await supabase.auth.admin.deleteUser(data.user!.id)
+		return Response.json(await res.json(), { headers })
+	}
 
 	const company = (await res.json()) as Company
 	await supabase.auth.admin.updateUserById(data.user!.id, {
 		user_metadata: { company_id: company.id }
 	})
 
-	return Response.json(
+  return Response.json(
 		{
 			error: false,
 			type: "message",
@@ -91,22 +102,22 @@ export async function action({ request }: Route.ActionArgs) {
 	)
 }
 
-export default function SignUpOwner() {
+export default function SignUpEmployee() {
 	const actionData = useActionData<ServerResponse | undefined>()
 	const navigate = useNavigate()
 	const submit = useSubmit()
 
-	const form = useForm<z.infer<typeof signUpOwnerSchema>>({
-		resolver: zodResolver(signUpOwnerSchema),
+	const form = useForm<z.infer<typeof signUpEmployeeSchema>>({
+		resolver: zodResolver(signUpEmployeeSchema),
 		defaultValues: {
 			name: "",
 			email: "",
 			password: "",
-			company_name: ""
+			code: ""
 		}
 	})
 
-	const onSubmit = async (values: z.infer<typeof signUpOwnerSchema>) => {
+	const onSubmit = async (values: z.infer<typeof signUpEmployeeSchema>) => {
 		await submit(values, {
 			method: "POST",
 			encType: "application/json"
@@ -129,7 +140,7 @@ export default function SignUpOwner() {
 					<h1>Regisztráció</h1>
 				</CardTitle>
 				<CardDescription>
-					<p>Hozza létre saját cégének fiókját.</p>
+					<p>Hozza létre saját alkalmazotti fiókját.</p>
 				</CardDescription>
 			</CardHeader>
 			<Form {...form}>
@@ -180,12 +191,12 @@ export default function SignUpOwner() {
 						/>
 						<FormField
 							control={form.control}
-							name="company_name"
+							name="code"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Cégnév</FormLabel>
+									<FormLabel>Cégkód</FormLabel>
 									<FormControl>
-										<Input placeholder="Cég Neve" {...field} />
+										<Input placeholder="########" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
