@@ -1,16 +1,11 @@
+import { createContext, useContext } from "react"
+import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
 
-import type {
-	FieldValues,
-	Path,
-	UseFormReturn
-} from "react-hook-form"
-import type {
-	MessageErrorType,
-	ServerResponse
-} from "./types"
+import type { MessageErrorType, ServerResponse } from "~/types/response"
+import type { User } from "~/types/database"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -18,10 +13,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const handleServerResponse = <T = undefined>(
 	response: ServerResponse<T> | undefined,
-	{
-		form,
-		callback
-	}: {
+	options?: {
 		form?: UseFormReturn<T extends FieldValues ? T : FieldValues>
 		callback?: () => any
 	}
@@ -29,10 +21,10 @@ export const handleServerResponse = <T = undefined>(
 	if (!response) return
 
 	if (response.type === "field") {
-		if (!form) return
+		if (!options?.form) return
 		Object.entries<string>(response.fields as FieldValues).forEach(
 			([name, message]) => {
-				form.setError(
+				options.form!.setError(
 					name as
 						| `root.${string}`
 						| "root"
@@ -61,5 +53,17 @@ export const handleServerResponse = <T = undefined>(
 		messageToasts[response.messageType]()
 	}
 
-	if (!response.error && callback) callback()
+	if (!response.error && options?.callback) options.callback()
+}
+
+export const UserContext = createContext<User | null>(null)
+
+export function useUserContext() {
+	const user = useContext(UserContext)
+
+	if (!user) {
+		throw Error("The user can only be accessed inside the UserContextProvider!")
+	}
+
+	return user
 }

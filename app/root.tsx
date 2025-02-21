@@ -1,15 +1,20 @@
+import { createSupabaseServerClient } from "./lib/supabase"
 import {
 	isRouteErrorResponse,
 	Links,
 	Meta,
 	Outlet,
 	Scripts,
-	ScrollRestoration,
+	ScrollRestoration
 } from "react-router"
-import { Toaster } from "~/components/ui/sonner"
 
 import type { Route } from "./+types/root"
+import type { ServerResponse } from "./types/response"
+
 import "./app.css"
+import { Toaster } from "~/components/ui/sonner"
+import { useEffect } from "react"
+import { handleServerResponse } from "./lib/utils"
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,6 +28,25 @@ export const links: Route.LinksFunction = () => [
 		href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
 	}
 ]
+
+export async function action({ request }: Route.ActionArgs) {
+	const { supabase, headers } = createSupabaseServerClient(request)
+
+	await supabase.auth.signOut()
+
+	return Response.json(
+		{
+			error: false,
+			type: "message",
+			message: "Sikeres kijelentkezés!",
+			messageType: "success"
+		} as ServerResponse,
+		{
+			headers,
+			status: 200
+		}
+	)
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -43,7 +67,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	)
 }
 
-export default function App() {
+export default function App({ actionData }: Route.ComponentProps) {
+	useEffect(() => handleServerResponse(actionData), [actionData])
+
 	return <Outlet />
 }
 

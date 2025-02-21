@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useContext, useEffect } from "react"
 import { useActionData, useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
@@ -8,7 +8,7 @@ import { signInSchema } from "~/schemas/auth"
 import { toast } from "sonner"
 
 import type { Route } from "./+types/signin"
-import type { MessageError, ServerResponse } from "~/lib/types"
+import type { MessageError, ServerResponse } from "~/types/response"
 
 import {
 	Card,
@@ -29,7 +29,7 @@ import {
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { handleServerResponse } from "~/lib/utils"
+import { handleServerResponse, UserContext } from "~/lib/utils"
 
 export async function action({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signInSchema>
@@ -37,7 +37,22 @@ export async function action({ request }: Route.ActionArgs) {
 	const { supabase, headers } = createSupabaseServerClient(request)
 	const { error } = await supabase.auth.signInWithPassword(fields)
 
-	if (error)
+	if (error) {
+		if (error.code === "unexpected_failure") {
+			return Response.json(
+				{
+					error: true,
+					type: "message",
+					message: "Váratlan hiba történt. Próbálja újra!",
+					messageType: "error"
+				} as ServerResponse,
+				{
+					headers,
+					status: 500
+				}
+			)
+		}
+
 		return Response.json(
 			{
 				error: true,
@@ -52,6 +67,7 @@ export async function action({ request }: Route.ActionArgs) {
 				status: 401
 			}
 		)
+	}
 
 	return Response.json(
 		{
@@ -62,13 +78,12 @@ export async function action({ request }: Route.ActionArgs) {
 		} as ServerResponse,
 		{
 			headers,
-      status: 200
+			status: 200
 		}
 	)
 }
 
-export default function SignIn() {
-	const actionData = useActionData<ServerResponse | undefined>()
+export default function SignIn({ actionData }: Route.ComponentProps) {
 	const navigate = useNavigate()
 	const submit = useSubmit()
 
@@ -87,11 +102,7 @@ export default function SignIn() {
 		})
 	}
 
-	useEffect(
-		() =>
-			handleServerResponse(actionData, { form, callback: () => navigate("/") }),
-		[actionData]
-	)
+	useEffect(() => handleServerResponse(actionData, { form }), [actionData])
 
 	return (
 		<Card className="w-full max-w-xl">

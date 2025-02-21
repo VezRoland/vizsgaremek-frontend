@@ -66,7 +66,7 @@ export async function action({ request }: Route.ActionArgs) {
       {
         error: true,
         type: "message",
-        message: "Váratlan hiba történ. Próbálja újra!",
+        message: "Váratlan hiba történt. Próbálja újra!",
         messageType: "error"
       } as ServerResponse,
       {

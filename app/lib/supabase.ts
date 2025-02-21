@@ -19,6 +19,6 @@ export const createSupabaseServerClient = (request: Request) => {
 			}
 		}
 	)
-
+  
 	return { supabase, headers }
 }
