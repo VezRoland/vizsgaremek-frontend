@@ -5,10 +5,10 @@ import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signInSchema } from "~/schemas/auth"
-import { toast } from "sonner"
+import { handleServerResponse } from "~/lib/utils"
 
 import type { Route } from "./+types/signin"
-import type { MessageError, ServerResponse } from "~/lib/types"
+import type { MessageError, ServerResponse } from "~/types/response"
 
 import {
 	Card,
@@ -28,8 +28,7 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
-import { Loader2 } from "lucide-react"
-import { handleServerResponse } from "~/lib/utils"
+import { KeyRound, Loader2, Mail } from "lucide-react"
 
 export async function action({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signInSchema>
@@ -62,7 +61,7 @@ export async function action({ request }: Route.ActionArgs) {
 		} as ServerResponse,
 		{
 			headers,
-      status: 200
+			status: 200
 		}
 	)
 }
@@ -105,15 +104,16 @@ export default function SignIn() {
 			</CardHeader>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
-					<CardContent className="flex flex-col gap-1.5">
+					<CardContent className="flex flex-col gap-2">
 						<FormField
 							control={form.control}
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email</FormLabel>
+                  <FormLabel>Email cím</FormLabel>
 									<FormControl>
 										<Input
+                      icon={<Mail size={16} />}
 											type="email"
 											placeholder="emailcim@domain.com"
 											{...field}
@@ -128,9 +128,14 @@ export default function SignIn() {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Jelszó</FormLabel>
+                  <FormLabel>Jelszó</FormLabel>
 									<FormControl>
-										<Input type="password" placeholder="********" {...field} />
+										<Input
+											icon={<KeyRound size={16} />}
+											type="password"
+											placeholder="********"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

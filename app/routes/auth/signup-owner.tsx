@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useActionData, useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
@@ -28,8 +29,7 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
-import { Loader2 } from "lucide-react"
-import { useEffect } from "react"
+import { Building2, KeyRound, Loader2, Mail, UserRound } from "lucide-react"
 
 export async function action({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signUpOwnerSchema>
@@ -68,9 +68,9 @@ export async function action({ request }: Route.ActionArgs) {
 	})
 
 	if (res.status !== 201) {
-    await supabase.auth.admin.deleteUser(data.user!.id)
-    return Response.json(await res.json(), { headers })
-  }
+		await supabase.auth.admin.deleteUser(data.user!.id)
+		return Response.json(await res.json(), { headers })
+	}
 
 	const company = (await res.json()) as Company
 	await supabase.auth.admin.updateUserById(data.user!.id, {
@@ -134,7 +134,7 @@ export default function SignUpOwner() {
 			</CardHeader>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
-					<CardContent className="flex flex-col gap-1.5">
+					<CardContent className="flex flex-col gap-2">
 						<FormField
 							control={form.control}
 							name="name"
@@ -142,7 +142,11 @@ export default function SignUpOwner() {
 								<FormItem>
 									<FormLabel>Teljes név</FormLabel>
 									<FormControl>
-										<Input placeholder="Teljes Név" {...field} />
+										<Input
+											icon={<UserRound size={16} />}
+											placeholder="Teljes Név"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -156,6 +160,7 @@ export default function SignUpOwner() {
 									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input
+											icon={<Mail size={16} />}
 											type="email"
 											placeholder="emailcim@domain.com"
 											{...field}
@@ -172,7 +177,12 @@ export default function SignUpOwner() {
 								<FormItem>
 									<FormLabel>Jelszó</FormLabel>
 									<FormControl>
-										<Input type="password" placeholder="********" {...field} />
+										<Input
+											icon={<KeyRound size={16} />}
+											type="password"
+											placeholder="********"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -185,7 +195,11 @@ export default function SignUpOwner() {
 								<FormItem>
 									<FormLabel>Cégnév</FormLabel>
 									<FormControl>
-										<Input placeholder="Cég Neve" {...field} />
+										<Input
+											icon={<Building2 size={16} />}
+											placeholder="Cég Neve"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

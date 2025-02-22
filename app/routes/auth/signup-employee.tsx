@@ -29,7 +29,13 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
-import { Loader2 } from "lucide-react"
+import {
+	KeyRound,
+	Loader2,
+	Mail,
+	SquareAsterisk,
+	UserRound
+} from "lucide-react"
 
 export async function action({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signUpEmployeeSchema>
@@ -45,15 +51,15 @@ export async function action({ request }: Route.ActionArgs) {
 		email_confirm: true
 	})
 
-  if (error) {
-    if (error.code === "email_exists") {
+	if (error) {
+		if (error.code === "email_exists") {
 			return Response.json(
 				{
 					error: true,
 					type: "field",
 					fields: {
-            email: "Már létezik felhasználó ilyen email címmel!"
-          },
+						email: "Már létezik felhasználó ilyen email címmel!"
+					}
 				} as ServerResponse<z.infer<typeof signUpEmployeeSchema>>,
 				{
 					headers,
@@ -62,19 +68,19 @@ export async function action({ request }: Route.ActionArgs) {
 			)
 		}
 
-    return Response.json(
-      {
-        error: true,
-        type: "message",
-        message: "Váratlan hiba történ. Próbálja újra!",
-        messageType: "error"
-      } as ServerResponse,
-      {
-        headers,
-        status: 403
-      }
-    )
-  }
+		return Response.json(
+			{
+				error: true,
+				type: "message",
+				message: "Váratlan hiba történ. Próbálja újra!",
+				messageType: "error"
+			} as ServerResponse,
+			{
+				headers,
+				status: 403
+			}
+		)
+	}
 
 	const res = await fetch(`${process.env.VITE_API_URL}/company/${fields.code}`)
 
@@ -88,7 +94,7 @@ export async function action({ request }: Route.ActionArgs) {
 		user_metadata: { company_id: company.id }
 	})
 
-  return Response.json(
+	return Response.json(
 		{
 			error: false,
 			type: "message",
@@ -145,7 +151,7 @@ export default function SignUpEmployee() {
 			</CardHeader>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
-					<CardContent className="flex flex-col gap-1.5">
+					<CardContent className="flex flex-col gap-2">
 						<FormField
 							control={form.control}
 							name="name"
@@ -153,7 +159,11 @@ export default function SignUpEmployee() {
 								<FormItem>
 									<FormLabel>Teljes név</FormLabel>
 									<FormControl>
-										<Input placeholder="Teljes Név" {...field} />
+										<Input
+											icon={<UserRound size={16} />}
+											placeholder="Teljes Név"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -167,6 +177,7 @@ export default function SignUpEmployee() {
 									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input
+											icon={<Mail size={16} />}
 											type="email"
 											placeholder="emailcim@domain.com"
 											{...field}
@@ -183,7 +194,12 @@ export default function SignUpEmployee() {
 								<FormItem>
 									<FormLabel>Jelszó</FormLabel>
 									<FormControl>
-										<Input type="password" placeholder="********" {...field} />
+										<Input
+											icon={<KeyRound size={16} />}
+											type="password"
+											placeholder="********"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -196,7 +212,11 @@ export default function SignUpEmployee() {
 								<FormItem>
 									<FormLabel>Cégkód</FormLabel>
 									<FormControl>
-										<Input placeholder="########" {...field} />
+										<Input
+											icon={<SquareAsterisk size={16} />}
+											placeholder="########"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
