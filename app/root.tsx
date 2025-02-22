@@ -50,7 +50,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
-		<html className="dark bg-background" lang="en">
+		<html className="bg-background" lang="en">
 			<head>
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />

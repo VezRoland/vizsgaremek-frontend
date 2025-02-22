@@ -7,7 +7,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = createSupabaseServerClient(request)
 
   const { data } = await supabase.auth.getUser()
-  if (data.user) return redirect("/")
+  if (data.user) return redirect("/", { headers })
 }
 
 export default function AuthLayout() {

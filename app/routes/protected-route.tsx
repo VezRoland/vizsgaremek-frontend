@@ -7,13 +7,14 @@ import { Navbar } from "~/components/navbar"
 
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const res = await fetch(`${process.env.VITE_API_URL}/user`, {
-		headers: request.headers
-	})
-	const user = await res.json()
+  const res = await fetch(`${process.env.VITE_API_URL}/user`, {
+    headers: request.headers
+  })
+  
+  if (res.status !== 200) return redirect("/signin")
 
-	if (res.status !== 200) return redirect("/signin")
-	return user as User
+  const user = await res.json()
+  return user as User
 }
 
 export default function ProtectedRoute({ loaderData }: Route.ComponentProps) {
