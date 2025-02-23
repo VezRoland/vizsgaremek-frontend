@@ -12,7 +12,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function AuthLayout() {
 	return (
-		<main className="h-screen grid place-items-center">
+		<main className="h-screen grid place-items-center p-4">
 			<Outlet />
 		</main>
 	)
