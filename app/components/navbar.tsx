@@ -20,7 +20,8 @@ export function Navbar({ onSignOut }: { onSignOut: () => void }) {
 			minRole: UserRole.leader
 		},
 		{ name: "Beosztás", path: "/schedule", minRole: UserRole.employee },
-		{ name: "Betanítás", path: "/training", minRole: UserRole.employee }
+		{ name: "Betanítás", path: "/training", minRole: UserRole.employee },
+    { name: "Segítség", path: "/help", minRole: UserRole.employee }
 	] satisfies Route[]
 
 	return isDesktop ? (
