@@ -4,6 +4,7 @@ import type { Route } from "./+types/protected-route"
 import type { User } from "~/types/database"
 import { UserContext } from "~/lib/utils"
 import { Navbar } from "~/components/navbar"
+import type { ApiResponse } from "~/types/response"
 
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -13,8 +14,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   
   if (res.status !== 200) return redirect("/signin")
 
-  const user = await res.json()
-  return user as User
+  const user = await res.json() as ApiResponse<User>
+  return user.data
 }
 
 export default function ProtectedRoute({ loaderData }: Route.ComponentProps) {

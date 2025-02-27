@@ -8,7 +8,7 @@ import { signInSchema } from "~/schemas/auth"
 import { handleServerResponse, UserContext } from "~/lib/utils"
 
 import type { Route } from "./+types/signin"
-import type { MessageError, ServerResponse } from "~/types/response"
+import type { ApiResponse } from "~/types/response"
 
 import {
 	Card,
@@ -37,44 +37,38 @@ export async function action({ request }: Route.ActionArgs) {
 	const { error } = await supabase.auth.signInWithPassword(fields)
 
 	if (error) {
-		if (error.code === "unexpected_failure") {
+		if (error.code === "invalid_credentials") {
 			return Response.json(
 				{
-					error: true,
-					type: "message",
-					message: "Váratlan hiba történt. Próbálja újra!",
-					messageType: "error"
-				} as ServerResponse,
-				{
-					headers,
-					status: 500
-				}
+					status: "error",
+					message:
+						"The sign in failed. Check the provided credentials and try again!",
+					errors: {
+						email: "Invalid email or/and password",
+						password: "Invalid email or/and password"
+					}
+				} satisfies ApiResponse<null, z.infer<typeof signInSchema>>,
+				{ headers, status: 401 }
 			)
 		}
 
 		return Response.json(
 			{
-				error: true,
-				type: "field",
-				fields: {
-					email: "Helytelen email cím és/vagy jelszó",
-					password: "Helytelen email cím és/vagy jelszó"
-				}
-			} as ServerResponse<z.infer<typeof signInSchema>>,
+				status: "error",
+				message: "There was an unexpected error. Try again later!"
+			} satisfies ApiResponse,
 			{
 				headers,
-				status: 401
+				status: 500
 			}
 		)
 	}
 
 	return Response.json(
 		{
-			error: false,
-			type: "message",
-			message: "Sikeres bejelentkezés!",
-			messageType: "success"
-		} as ServerResponse,
+			status: "success",
+			message: "Successfully signed in."
+		} as ApiResponse,
 		{
 			headers,
 			status: 200
@@ -121,10 +115,10 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-                  <FormLabel>Email cím</FormLabel>
+									<FormLabel>Email cím</FormLabel>
 									<FormControl>
 										<Input
-                      icon={<Mail size={16} />}
+											icon={<Mail size={16} />}
 											type="email"
 											placeholder="emailcim@domain.com"
 											{...field}
@@ -139,7 +133,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-                  <FormLabel>Jelszó</FormLabel>
+									<FormLabel>Jelszó</FormLabel>
 									<FormControl>
 										<Input
 											icon={<KeyRound size={16} />}
