@@ -4,31 +4,31 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
 
-import type { MessageErrorType, ServerResponse } from "~/types/response"
+import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
-export const handleServerResponse = <T = undefined>(
-	response: ServerResponse<T> | undefined,
+export const handleServerResponse = <D = unknown, E = unknown>(
+	response: ApiResponse<D, E> | undefined,
 	options?: {
-		form?: UseFormReturn<T extends FieldValues ? T : FieldValues>
+		form?: UseFormReturn<E extends FieldValues ? E : FieldValues>
 		callback?: () => any
 	}
 ) => {
 	if (!response) return
 
-	if (response.type === "field") {
+	if (response.status === "error") {
 		if (!options?.form) return
-		Object.entries<string>(response.fields as FieldValues).forEach(
+		Object.entries<string>(response.errors as FieldValues).forEach(
 			([name, message]) => {
 				options.form!.setError(
 					name as
 						| `root.${string}`
 						| "root"
-						| Path<T extends FieldValues ? T : FieldValues>,
+						| Path<E extends FieldValues ? E : FieldValues>,
 					{
 						type: "custom",
 						message
@@ -38,25 +38,21 @@ export const handleServerResponse = <T = undefined>(
 		)
 	}
 
-	if (response.type === "message") {
+	if (response.status === "success") {
 		const messageToasts = {
 			error: () =>
-				toast.error(response.message, { description: response.description }),
-			warning: () =>
-				toast.warning(response.message, { description: response.description }),
+				toast.error(response.message),
 			success: () =>
-				toast.success(response.message, { description: response.description }),
-			info: () =>
-				toast.info(response.message, { description: response.description })
-		} as Record<MessageErrorType, () => any>
+				toast.success(response.message)
+		} as Record<string, () => any>
 
-		messageToasts[response.messageType]()
+		messageToasts[response.status]()
 	}
 
-	if (!response.error && options?.callback) options.callback()
+	if (response.status !== "error" && options?.callback) options.callback()
 }
 
-export const UserContext = createContext<User | null>(null)
+export const UserContext = createContext<User | undefined>(undefined)
 
 export function useUserContext() {
 	const user = useContext(UserContext)
