@@ -6,16 +6,15 @@ import { UserContext } from "~/lib/utils"
 import { Navbar } from "~/components/navbar"
 import type { ApiResponse } from "~/types/response"
 
-
 export async function loader({ request }: Route.LoaderArgs) {
-  const res = await fetch(`${process.env.VITE_API_URL}/user`, {
-    headers: request.headers
-  })
-  
-  if (res.status !== 200) return redirect("/signin")
+	const res = await fetch(`${process.env.VITE_API_URL}/user`, {
+		headers: request.headers
+	})
 
-  const user = await res.json() as ApiResponse<User>
-  return user.data
+	if (res.status !== 200) return redirect("/signin")
+
+	const response = (await res.json()) as ApiResponse<User>
+	return response.data
 }
 
 export default function ProtectedRoute({ loaderData }: Route.ComponentProps) {
