@@ -20,7 +20,7 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 ) => {
 	if (!response) return
 
-	if (response.status === "error") {
+	if (response.errors) {
 		if (!options?.form) return
 		Object.entries<string>(response.errors as FieldValues).forEach(
 			([name, message]) => {
@@ -38,17 +38,12 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 		)
 	}
 
-	if (response.status === "success") {
-		const messageToasts = {
-			error: () =>
-				toast.error(response.message),
-			success: () =>
-				toast.success(response.message)
-		} as Record<string, () => any>
+	const messageToasts = {
+		error: () => toast.error(response.message),
+		success: () => toast.success(response.message)
+	} as Record<string, () => any>
 
-		messageToasts[response.status]()
-	}
-
+	messageToasts[response.status]()
 	if (response.status !== "error" && options?.callback) options.callback()
 }
 

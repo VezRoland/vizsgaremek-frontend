@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ticketSchema } from "~/schemas/ticket"
 
 import type { Route } from "./+types/help"
-import type { Ticket } from "~/types/database"
+import { UserRole, type Ticket, type TicketResponse } from "~/types/database"
 import type { ApiResponse } from "~/types/response"
 
 import {
@@ -33,7 +33,12 @@ import { Loader2 } from "lucide-react"
 import { HelpTicketStatus } from "~/components/help-ticket-status"
 import { HelpTicketPreview } from "~/components/help-ticket-preview"
 import { Separator } from "~/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger } from "~/components/ui/select"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger
+} from "~/components/ui/select"
 import { SelectValue } from "@radix-ui/react-select"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
@@ -43,45 +48,45 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 		case "POST":
 			const newTicket = data as z.infer<typeof ticketSchema>
 
-			const response = await fetch("http://localhost/ticket", {
+			const response = await fetch("http://localhost:3000/ticket", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify(newTicket)
+				body: JSON.stringify({
+					...newTicket,
+					company_id: JSON.parse(newTicket.company_id)
+				})
 			})
 
-      return response
+			return response
 	}
 }
 
-export function clientLoader() {
-	return [
-		{
-			id: "a",
-			title: "Test ticket",
-			content: "This is a test ticket",
-			closed: false,
-			createdAt: new Date().toDateString()
-		},
-		{
-			id: "b",
-			title: "Another ticket",
-			content: "This is a test ticket again",
-			closed: true,
-			createdAt: new Date().toDateString()
-		}
-	] satisfies Ticket[]
+export async function clientLoader() {
+	const response = await fetch("http://localhost:3000/ticket/all", {
+		credentials: "include"
+	})
+	const tickets = (await response.json()) as ApiResponse<Ticket[]>
+	return tickets.data || []
 }
 
 export default function Help({ actionData, loaderData }: Route.ComponentProps) {
-  const user = useUserContext()
+	const user = useUserContext()
 	const submit = useSubmit()
+
+	let ownTickets: Ticket[] = []
+	let companyTickets: Ticket[] = []
+
+	loaderData.forEach(ticket => {
+		if (ticket.user_id === user.id) return ownTickets.push(ticket)
+		companyTickets.push(ticket)
+	})
 
 	const form = useForm<z.infer<typeof ticketSchema>>({
 		resolver: zodResolver(ticketSchema),
 		defaultValues: {
 			title: "",
-      company_id: "null",
+			company_id: "null",
 			content: ""
 		}
 	})
@@ -99,10 +104,11 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
 			<Card>
 				<CardHeader>
-					<CardTitle>Hibajegy létrehozása</CardTitle>
+					<CardTitle>Ticket creation</CardTitle>
 					<CardDescription>
-						Hozzon létre hibajegyet az alkalmazással kapcsolatos technikai
-						problémák, vagy cégével kapcsolatban.
+						{user.role === UserRole.owner
+							? "Create a ticket regarding technical issues with the application."
+							: "Create a ticket regarding technical issues with the application or your company."}
 					</CardDescription>
 				</CardHeader>
 				<Form {...form}>
@@ -113,10 +119,10 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 								name="title"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Cím</FormLabel>
+										<FormLabel>Title</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="Hibajegy rövid ismertető címe"
+												placeholder="Short, descriptive title"
 												{...field}
 											/>
 										</FormControl>
@@ -124,38 +130,40 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 									</FormItem>
 								)}
 							/>
-              <FormField
-                control={form.control}
-                name="company_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Címzett</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Címzett" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={user.company_id}>Cég</SelectItem>
-                          <SelectItem value="null">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+							{user.role !== UserRole.owner && (
+								<FormField
+									control={form.control}
+									name="company_id"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Receiver</FormLabel>
+											<FormControl>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Címzett" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value={user.company_id}>Cég</SelectItem>
+														<SelectItem value="null">Admin</SelectItem>
+													</SelectContent>
+												</Select>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							)}
 							<FormField
 								control={form.control}
 								name="content"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Leírás</FormLabel>
+										<FormLabel>Description</FormLabel>
 										<FormControl>
-											<Textarea
-												placeholder="Hibajegy hosszú leírása"
-												{...field}
-											/>
+											<Textarea placeholder="Detailed description" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -167,23 +175,38 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 								{form.formState.isSubmitting && (
 									<Loader2 className="animate-spin" />
 								)}
-								Létrehozás
+								Create
 							</Button>
 						</CardFooter>
 					</form>
 				</Form>
 			</Card>
-			<section>
-        <div className="flex items-center gap-4">
-          <h3 className="text-xl font-semibold">Korábbi hibajegyek</h3>
-          <Separator className="flex-1" />
-        </div>
-				<ul className="p-4">
-					{loaderData.map(ticket => (
-						<HelpTicketPreview key={ticket.id} {...ticket} />
-					))}
-				</ul>
-			</section>
+			{ownTickets.length > 0 && (
+				<section>
+					<div className="flex items-center gap-4">
+						<h3 className="text-xl font-semibold">Own tickets</h3>
+						<Separator className="flex-1" />
+					</div>
+					<div className="flex flex-col p-4">
+						{ownTickets.map(ticket => (
+							<HelpTicketPreview key={ticket.id} {...ticket} />
+						))}
+					</div>
+				</section>
+			)}
+			{companyTickets.length > 0 && (
+				<section>
+					<div className="flex items-center gap-4">
+						<h3 className="text-xl font-semibold">Company tickets</h3>
+						<Separator className="flex-1" />
+					</div>
+					<div className="flex flex-col p-4">
+						{companyTickets.map(ticket => (
+							<HelpTicketPreview key={ticket.id} {...ticket} />
+						))}
+					</div>
+				</section>
+			)}
 		</main>
 	)
 }

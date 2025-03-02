@@ -22,8 +22,8 @@ export function HelpTicketStatus({ closed }: { closed: boolean }) {
 				<TooltipContent>
 					<p>
 						{closed
-							? "A hibajegy lezárult."
-							: "A hibajegy megoldása még folyamatban."}
+							? "The ticket was closed"
+							: "Solving the ticket is still in progress"}
 					</p>
 				</TooltipContent>
 			</Tooltip>
