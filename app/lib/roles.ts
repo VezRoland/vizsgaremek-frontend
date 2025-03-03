@@ -1,5 +1,5 @@
-import type { User } from "@supabase/supabase-js"
-import { UserRole, type Ticket } from "../types/database"
+import { UserRole } from "../types/database"
+import type { Ticket, User } from "../types/database"
 
 type PermissionCheck<Key extends keyof Permissions> =
 	| boolean
@@ -33,7 +33,7 @@ export function hasPermission<Resource extends keyof Permissions>(
 	action: Permissions[Resource]["action"],
 	data?: Permissions[Resource]["dataType"]
 ) {
-	const role = user.user_metadata.role as UserRole
+	const role = user.role as UserRole
 	const permission = (ROLES as RolesWithPermissions)[role][resource]?.[action]
 	if (permission == null) return false
 
