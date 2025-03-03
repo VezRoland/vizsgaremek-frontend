@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useActionData, useNavigate, useSubmit } from "react-router"
+import { useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -8,7 +8,7 @@ import { signUpEmployeeSchema } from "~/schemas/auth"
 import { handleServerResponse } from "~/lib/utils"
 
 import type { Route } from "./+types/signup-employee"
-import type { ServerResponse } from "~/types/response"
+import type { ApiResponse } from "~/types/response"
 import { UserRole, type Company } from "~/types/database"
 
 import {
@@ -55,12 +55,12 @@ export async function action({ request }: Route.ActionArgs) {
 		if (error.code === "email_exists") {
 			return Response.json(
 				{
-					error: true,
-					type: "field",
-					fields: {
-						email: "Már létezik felhasználó ilyen email címmel!"
+					status: "error",
+					message: "The registration failed.",
+					errors: {
+						email: "There is already a user with the same email address."
 					}
-				} as ServerResponse<z.infer<typeof signUpEmployeeSchema>>,
+				} as ApiResponse<null, z.infer<typeof signUpEmployeeSchema>>,
 				{
 					headers,
 					status: 403
@@ -68,19 +68,17 @@ export async function action({ request }: Route.ActionArgs) {
 			)
 		}
 
-    return Response.json(
-      {
-        error: true,
-        type: "message",
-        message: "Váratlan hiba történt. Próbálja újra!",
-        messageType: "error"
-      } as ServerResponse,
-      {
-        headers,
-        status: 403
-      }
-    )
-  }
+		return Response.json(
+			{
+				status: "error",
+				message: "An unexpected error occoured. Try again!"
+			} as ApiResponse,
+			{
+				headers,
+				status: 403
+			}
+		)
+	}
 
 	const res = await fetch(`${process.env.VITE_API_URL}/company/${fields.code}`)
 
@@ -96,11 +94,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 	return Response.json(
 		{
-			error: false,
-			type: "message",
-			message: "Sikeres regisztráció!",
-			messageType: "success"
-		} as ServerResponse,
+			status: "success",
+			message: "The registration was successful."
+		} as ApiResponse,
 		{
 			headers,
 			status: 200
@@ -108,8 +104,7 @@ export async function action({ request }: Route.ActionArgs) {
 	)
 }
 
-export default function SignUpEmployee() {
-	const actionData = useActionData<ServerResponse | undefined>()
+export default function SignUpEmployee({ actionData }: Route.ComponentProps) {
 	const navigate = useNavigate()
 	const submit = useSubmit()
 

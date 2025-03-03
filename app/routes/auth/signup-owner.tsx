@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useActionData, useNavigate, useSubmit } from "react-router"
+import { useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -8,7 +8,7 @@ import { signUpOwnerSchema } from "~/schemas/auth"
 import { handleServerResponse } from "~/lib/utils"
 
 import type { Route } from "./+types/signup-owner"
-import type { ServerResponse } from "~/types/response"
+import type { ApiResponse } from "~/types/response"
 import { UserRole, type Company } from "~/types/database"
 
 import {
@@ -49,11 +49,9 @@ export async function action({ request }: Route.ActionArgs) {
 		if (error.code === "unexpected_failure") {
 			return Response.json(
 				{
-					error: true,
-					type: "message",
-					message: "Váratlan hiba történt. Próbálja újra!",
-					messageType: "error"
-				} as ServerResponse,
+					status: "error",
+					message: "An unexpected error occoured. Try again!"
+				} as ApiResponse,
 				{
 					headers,
 					status: 403
@@ -79,11 +77,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 	return Response.json(
 		{
-			error: false,
-			type: "message",
-			message: "Sikeres regisztráció!",
-			messageType: "success"
-		} as ServerResponse,
+			status: "success",
+			message: "The registration was successful!"
+		} as ApiResponse,
 		{
 			headers,
 			status: 200
@@ -91,8 +87,7 @@ export async function action({ request }: Route.ActionArgs) {
 	)
 }
 
-export default function SignUpOwner() {
-	const actionData = useActionData<ServerResponse | undefined>()
+export default function SignUpOwner({ actionData }: Route.ComponentProps) {
 	const navigate = useNavigate()
 	const submit = useSubmit()
 
