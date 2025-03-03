@@ -39,5 +39,6 @@ export interface TicketResponse {
   name: string,
 	user_id: string
 	ticket_id: string
+	company_id: string
 	created_at: string
 }
