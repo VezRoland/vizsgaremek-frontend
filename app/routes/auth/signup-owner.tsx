@@ -40,7 +40,7 @@ export async function action({ request }: Route.ActionArgs) {
 		password: fields.password,
 		user_metadata: {
 			name: fields.name,
-			role: UserRole.owner
+			role: UserRole.Owner
 		},
 		email_confirm: true
 	})

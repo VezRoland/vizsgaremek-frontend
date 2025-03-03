@@ -10,10 +10,10 @@ export interface User {
 }
 
 export enum UserRole {
-	"employee" = 1,
-	"leader",
-	"owner",
-	"admin"
+	Employee = 1,
+	Leader,
+	Owner,
+	Admin
 }
 
 export interface Company {

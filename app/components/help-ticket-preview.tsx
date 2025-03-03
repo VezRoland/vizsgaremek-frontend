@@ -7,7 +7,7 @@ import { Link } from "react-router"
 export function HelpTicketPreview({ id, title, closed, created_at }: Ticket) {
 	return (
     <Link className="group" to={`/help/${id}`}>
-      <Card className="border-0 border-b group-first:rounded-t-xl group-last:border-b-0 group-last:rounded-b-xl rounded-none shadow-none hover:bg-accent cursor-pointer">
+      <Card className="border-0 border-b group-first:rounded-t-xl group-last:border-b-0 group-last:rounded-b-xl rounded-none shadow-none hover:bg-accent cursor-pointer bg-background">
         <CardHeader className="flex-row justify-between items-center gap-6">
           <div className="flex flex-col gap-1.5">
             <CardTitle className="text-lg">{title}</CardTitle>

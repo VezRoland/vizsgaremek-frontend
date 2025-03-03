@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ticketSchema } from "~/schemas/ticket"
 
 import type { Route } from "./+types/help"
-import { UserRole, type Ticket, type TicketResponse } from "~/types/database"
+import { UserRole, type Ticket } from "~/types/database"
 import type { ApiResponse } from "~/types/response"
 
 import {
@@ -46,16 +46,16 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 	switch (request.method) {
 		case "POST":
-			const newTicket = data as z.infer<typeof ticketSchema>
+			const newTicket = {
+				...data,
+				company_id: JSON.parse(data.company_id)
+			} as z.infer<typeof ticketSchema>
 
 			const response = await fetch("http://localhost:3000/ticket", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({
-					...newTicket,
-					company_id: JSON.parse(newTicket.company_id)
-				})
+				body: JSON.stringify(newTicket)
 			})
 
 			return response
@@ -106,7 +106,7 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 				<CardHeader>
 					<CardTitle>Ticket creation</CardTitle>
 					<CardDescription>
-						{user.role === UserRole.owner
+						{user.role === UserRole.Owner
 							? "Create a ticket regarding technical issues with the application."
 							: "Create a ticket regarding technical issues with the application or your company."}
 					</CardDescription>
@@ -130,7 +130,7 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 									</FormItem>
 								)}
 							/>
-							{user.role !== UserRole.owner && (
+							{user.role !== UserRole.Owner && (
 								<FormField
 									control={form.control}
 									name="company_id"
@@ -181,6 +181,19 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 					</form>
 				</Form>
 			</Card>
+      {companyTickets.length > 0 && (
+				<section>
+					<div className="flex items-center gap-4">
+						<h3 className="text-xl font-semibold">Company tickets</h3>
+						<Separator className="flex-1" />
+					</div>
+					<div className="flex flex-col p-4">
+						{companyTickets.map(ticket => (
+							<HelpTicketPreview key={ticket.id} {...ticket} />
+						))}
+					</div>
+				</section>
+			)}
 			{ownTickets.length > 0 && (
 				<section>
 					<div className="flex items-center gap-4">
@@ -189,19 +202,6 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 					</div>
 					<div className="flex flex-col p-4">
 						{ownTickets.map(ticket => (
-							<HelpTicketPreview key={ticket.id} {...ticket} />
-						))}
-					</div>
-				</section>
-			)}
-			{companyTickets.length > 0 && (
-				<section>
-					<div className="flex items-center gap-4">
-						<h3 className="text-xl font-semibold">Company tickets</h3>
-						<Separator className="flex-1" />
-					</div>
-					<div className="flex flex-col p-4">
-						{companyTickets.map(ticket => (
 							<HelpTicketPreview key={ticket.id} {...ticket} />
 						))}
 					</div>
