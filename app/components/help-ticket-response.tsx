@@ -14,7 +14,7 @@ export function HelpTicketResponse({ name, content, created_at }: TicketResponse
           </AvatarFallback>
         </Avatar>
 				<CardTitle className="flex-1 text-sm">{name}</CardTitle>
-        <span className="text-sm">{new Date(created_at).toLocaleDateString()}</span>
+        <span className="text-sm text-muted-foreground">{new Date(created_at).toLocaleDateString()}</span>
 			</CardHeader>
 			<CardContent>
 				<p>{content}</p>

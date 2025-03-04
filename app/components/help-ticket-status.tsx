@@ -14,7 +14,7 @@ export function HelpTicketStatus({ closed }: { closed: boolean }) {
 				<TooltipTrigger
 					className={cn(
 						"w-10 h-10 grid place-items-center rounded-full text-accent-foreground bg-accent cursor-default",
-						closed && "text-success-foreground bg-success"
+						closed && "text-primary-foreground bg-primary"
 					)}
 				>
 					{closed ? <Check size={18} /> : <Hourglass size={18} />}
