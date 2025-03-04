@@ -21,10 +21,42 @@ type Permissions = {
 }
 
 const ROLES = {
-	[UserRole.Admin]: {},
-	[UserRole.Owner]: {},
-	[UserRole.Leader]: {},
-	[UserRole.Employee]: {}
+	[UserRole.Admin]: {
+		tickets: {
+			view: (_, data) => data.company_id === null,
+			create: false,
+			delete: (_, data) => data.company_id === null,
+			close: (_, data) => data.company_id === null,
+			respond: (_, data) => data.company_id === null,
+		}
+	},
+	[UserRole.Owner]: {
+		tickets: {
+			view: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+			create: true,
+			delete: (user, data) => user.company_id === data.company_id,
+			close: (user, data) => user.company_id === data.company_id,
+			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+		}
+	},
+	[UserRole.Leader]: {
+		tickets: {
+			view: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+			create: true,
+			delete: (user, data) => user.company_id === data.company_id,
+			close: (user, data) => user.company_id === data.company_id,
+			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+		}
+	},
+	[UserRole.Employee]: {
+		tickets: {
+			view: (user, data) => user.id === data.user_id,
+			create: true,
+			delete: false,
+			close: false,
+			respond: (user, data) => user.id === data.user_id,
+		}
+	}
 } as const satisfies RolesWithPermissions
 
 export function hasPermission<Resource extends keyof Permissions>(

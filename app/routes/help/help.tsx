@@ -40,6 +40,7 @@ import {
 	SelectTrigger
 } from "~/components/ui/select"
 import { SelectValue } from "@radix-ui/react-select"
+import { hasPermission } from "~/lib/roles"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
@@ -75,11 +76,11 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 	const submit = useSubmit()
 
 	let ownTickets: Ticket[] = []
-	let companyTickets: Ticket[] = []
+	let notOwnTickets: Ticket[] = []
 
 	loaderData.forEach(ticket => {
 		if (ticket.user_id === user.id) return ownTickets.push(ticket)
-		companyTickets.push(ticket)
+		notOwnTickets.push(ticket)
 	})
 
 	const form = useForm<z.infer<typeof ticketSchema>>({
@@ -102,93 +103,102 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 
 	return (
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
-			<Card>
-				<CardHeader>
-					<CardTitle>Ticket creation</CardTitle>
-					<CardDescription>
-						{user.role === UserRole.Owner
-							? "Create a ticket regarding technical issues with the application."
-							: "Create a ticket regarding technical issues with the application or your company."}
-					</CardDescription>
-				</CardHeader>
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
-						<CardContent>
-							<FormField
-								control={form.control}
-								name="title"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Title</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="Short, descriptive title"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							{user.role !== UserRole.Owner && (
+			{hasPermission(user, "tickets", "create") && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Ticket creation</CardTitle>
+						<CardDescription>
+							{user.role === UserRole.Owner
+								? "Create a ticket regarding technical issues with the application."
+								: "Create a ticket regarding technical issues with the application or your company."}
+						</CardDescription>
+					</CardHeader>
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)}>
+							<CardContent>
 								<FormField
 									control={form.control}
-									name="company_id"
+									name="title"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Receiver</FormLabel>
+											<FormLabel>Title</FormLabel>
 											<FormControl>
-												<Select
-													onValueChange={field.onChange}
-													defaultValue={field.value}
-												>
-													<SelectTrigger>
-														<SelectValue placeholder="Címzett" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value={user.company_id}>Cég</SelectItem>
-														<SelectItem value="null">Admin</SelectItem>
-													</SelectContent>
-												</Select>
+												<Input
+													placeholder="Short, descriptive title"
+													{...field}
+												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
-							)}
-							<FormField
-								control={form.control}
-								name="content"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Description</FormLabel>
-										<FormControl>
-											<Textarea placeholder="Detailed description" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
+								{user.role !== UserRole.Owner && (
+									<FormField
+										control={form.control}
+										name="company_id"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Receiver</FormLabel>
+												<FormControl>
+													<Select
+														onValueChange={field.onChange}
+														defaultValue={field.value}
+													>
+														<SelectTrigger>
+															<SelectValue placeholder="Receiver" />
+														</SelectTrigger>
+														<SelectContent>
+															<SelectItem value={user.company_id}>
+																Company
+															</SelectItem>
+															<SelectItem value="null">Admin</SelectItem>
+														</SelectContent>
+													</Select>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 								)}
-							/>
-						</CardContent>
-						<CardFooter className="justify-end">
-							<Button type="submit" disabled={form.formState.isSubmitting}>
-								{form.formState.isSubmitting && (
-									<Loader2 className="animate-spin" />
-								)}
-								Create
-							</Button>
-						</CardFooter>
-					</form>
-				</Form>
-			</Card>
-      {companyTickets.length > 0 && (
+								<FormField
+									control={form.control}
+									name="content"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Description</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Detailed description"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</CardContent>
+							<CardFooter className="justify-end">
+								<Button type="submit" disabled={form.formState.isSubmitting}>
+									{form.formState.isSubmitting && (
+										<Loader2 className="animate-spin" />
+									)}
+									Create
+								</Button>
+							</CardFooter>
+						</form>
+					</Form>
+				</Card>
+			)}
+			{notOwnTickets.length > 0 && (
 				<section>
 					<div className="flex items-center gap-4">
-						<h3 className="text-xl font-semibold">Company tickets</h3>
+						<h3 className="text-xl font-semibold">
+							{user.role === UserRole.Admin ? "Tickets" : "Company tickets"}
+						</h3>
 						<Separator className="flex-1" />
 					</div>
 					<div className="flex flex-col p-4">
-						{companyTickets.map(ticket => (
+						{notOwnTickets.map(ticket => (
 							<HelpTicketPreview key={ticket.id} {...ticket} />
 						))}
 					</div>
