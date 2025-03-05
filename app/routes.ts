@@ -9,6 +9,7 @@ import {
 export default [
 	layout("routes/protected-route.tsx", [
 		index("routes/home.tsx"),
+    route("schedule", "routes/schedule.tsx"),
 		...prefix("help", [
 			index("routes/help/help.tsx"),
 			route(":ticketId", "routes/help/help-ticket.tsx")

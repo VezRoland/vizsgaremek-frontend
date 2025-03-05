@@ -23,6 +23,19 @@ export interface Company {
 	created_at: string
 }
 
+export interface Schedule {
+  id: string,
+  start: string,
+  end: string,
+  category: ScheduleCategory,
+  user_id: string
+}
+
+export enum ScheduleCategory {
+  Paid = 1,
+  Unpaid
+}
+
 export interface Ticket {
 	id: string
 	title: string
