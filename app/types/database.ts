@@ -29,6 +29,7 @@ export interface Schedule {
   end: string,
   category: ScheduleCategory,
   user_id: string
+  company_id: string
 }
 
 export enum ScheduleCategory {

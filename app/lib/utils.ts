@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
+import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -57,4 +58,20 @@ export function useUserContext() {
 	}
 
 	return user
+}
+
+export const ScheduleContext = createContext<
+	{ tableData: ScheduleWeek; fieldData?: ScheduleWithUser[] } | undefined
+>(undefined)
+
+export function useScheduleContext() {
+	const schedule = useContext(ScheduleContext)
+
+	if (!schedule) {
+		throw Error(
+			"The schedule can only be accessed inside the ScheduleContextProvider!"
+		)
+	}
+
+	return schedule
 }
