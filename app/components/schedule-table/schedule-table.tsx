@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Link, useSubmit } from "react-router"
 import { ScheduleContext } from "~/lib/utils"
 
@@ -14,6 +14,15 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "../ui/select"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger
+} from "../ui/dialog"
+import { NewScheduleDialog } from "./new-schedule-dialog"
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -86,13 +95,13 @@ export function ScheduleTable({
 							</Button>
 						</Link>
 					</div>
-					<div className="w-max min-w-[min(160px,100%)] flex-[999]">
-						<Select>
+					<div className="w-max min-w-[min(215px,100%)] flex flex-[999] gap-4">
+						<Select defaultValue="all">
 							<SelectTrigger className="max-w-60 ml-auto">
-								<SelectValue placeholder="All" />
+								<SelectValue placeholder="Choose a category" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="">All</SelectItem>
+								<SelectItem value="all">All</SelectItem>
 								<SelectItem value={String(ScheduleCategory.Paid)}>
 									Paid
 								</SelectItem>
@@ -101,6 +110,11 @@ export function ScheduleTable({
 								</SelectItem>
 							</SelectContent>
 						</Select>
+						<NewScheduleDialog>
+							<Button className="aspect-square" size="icon">
+								<Plus />
+							</Button>
+						</NewScheduleDialog>
 					</div>
 				</div>
 				<div className="w-full flex-1 border-b rounded-md text-nowrap bg-accent overflow-auto">
@@ -125,7 +139,7 @@ export function ScheduleTable({
 						</thead>
 						<tbody className="bg-background">
 							{Array.from({ length: 24 }).map((_, row) => (
-								<tr key={row}>
+								<tr key={row} className="group">
 									{Array.from({ length: 7 }).map((_, column) => (
 										<ScheduleTableItem
 											key={`${row}-${column}`}

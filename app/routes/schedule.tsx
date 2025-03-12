@@ -27,6 +27,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const url = new URL(request.url)
+  console.log(url)
 	const weekStart = url.searchParams.get("week_start")
 
 	const data = await fetch(
@@ -48,6 +49,8 @@ export default function Schedule({
 	let date = new Date()
 	date = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000)
 	date.setUTCHours(0, 0, 0, 0)
+
+  console.log(actionData)
 
 	return (
 		<main className="h-[calc(100vh-69px)] p-4">

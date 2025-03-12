@@ -7,8 +7,8 @@ const Input = React.forwardRef<
 	React.ComponentProps<"input"> & { icon?: React.ReactElement }
 >(({ className, type, icon, ...props }, ref) => {
 	return (
-		<div className="relative contents group">
-			{icon && <div className="absolute w-9 h-9 grid place-content-center border-border border-r text-muted-foreground group-[&:has(:focus-visible)]:text-primary pointer-events-none">{icon}</div>}
+		<div className="relative block group">
+			{icon && <div className="absolute top-0 left-0 w-9 h-9 grid place-content-center border-border border-r text-muted-foreground group-[&:has(:focus-visible)]:text-primary pointer-events-none">{icon}</div>}
 			<input
 				type={type}
 				className={cn(
