@@ -7,19 +7,15 @@ const Input = React.forwardRef<
 	React.ComponentProps<"input"> & { icon?: React.ReactElement }
 >(({ className, type, icon, ...props }, ref) => {
 	return (
-		<div className="relative block group">
-			{icon && <div className="absolute top-0 left-0 w-9 h-9 grid place-content-center border-border border-r text-muted-foreground group-[&:has(:focus-visible)]:text-primary pointer-events-none">{icon}</div>}
-			<input
-				type={type}
-				className={cn(
-					"flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-					icon && "pl-11",
-          className
-				)}
-				ref={ref}
-				{...props}
-			/>
-		</div>
+		<label
+			className={cn(
+				"h-9 w-full flex items-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-1 focus-within:ring-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+				className
+			)}
+		>
+			{icon && <div className="flex justify-center items-center h-4 w-4 text-muted-foreground">{icon}</div>}
+			<input className="w-full outline-none" type={type} ref={ref} {...props} />
+		</label>
 	)
 })
 Input.displayName = "Input"

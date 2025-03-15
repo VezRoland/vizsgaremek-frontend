@@ -14,14 +14,6 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "../ui/select"
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger
-} from "../ui/dialog"
 import { NewScheduleDialog } from "./new-schedule-dialog"
 
 const DAY = 24 * 60 * 60 * 1000
@@ -72,7 +64,7 @@ export function ScheduleTable({
 					<div className="flex flex-1 justify-between">
 						<Link
 							className="grid flex-1 place-content-center"
-							to={`/schedule?week_start=${tableData.prevDate}`}
+							to={`/schedule${tableData.prevDate ? `?week_start=${tableData.prevDate}` : ""}`}
 						>
 							<Button
 								size="icon"
@@ -84,7 +76,7 @@ export function ScheduleTable({
 						</Link>
 						<Link
 							className="grid flex-1 place-content-center"
-							to={`/schedule?week_start=${tableData.nextDate}`}
+							to={`/schedule${tableData.nextDate ? `?week_start=${tableData.nextDate}` : ""}`}
 						>
 							<Button
 								size="icon"
