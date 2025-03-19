@@ -48,15 +48,6 @@ export function ScheduleTable({
 	week.setUTCHours(0, 0, 0, 0)
 	week.setTime(week.getTime() - 14 * DAY)
 
-	function handleNavigation(date: number) {
-		submit(JSON.stringify({ type: "NAVIGATION", week_start: date }), {
-			method: "POST",
-			encType: "application/json"
-		})
-	}
-
-	console.log(tableData)
-
 	return (
 		<ScheduleContext.Provider value={{ tableData, fieldData }}>
 			<section className="w-full h-full flex flex-col gap-4">

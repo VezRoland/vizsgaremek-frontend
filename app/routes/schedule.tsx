@@ -1,33 +1,57 @@
 import type { Route } from "./+types/schedule"
-import type { Schedule } from "~/types/database"
-import type { ApiResponse } from "~/types/response"
-import type { ScheduleWeek } from "~/types/results"
+import type { Schedule, User } from "~/types/database"
+import type { ApiResponse, DetailsResponse, SearchResponse } from "~/types/response"
+import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
 
 import { ScheduleTable } from "~/components/schedule-table/schedule-table"
 
+
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
-	let result
+	let result: DetailsResponse | SearchResponse | undefined
 
 	switch (data.type) {
-		case "VIEW DETAILS":
+		case "VIEW_DETAILS": {
 			const field = data.field as string
 			const weekStart = data.weekStart
 			const page = data.page | 1
 
-			result = await fetch(
+			const response = await fetch(
 				`http://localhost:3000/schedule/details/${field}?week_start=${weekStart}&page=${page}`,
 				{ credentials: "include" }
 			)
-			break
+
+			return (result = {
+				type: "DetailsResponse",
+				...(await response.json())
+			} satisfies DetailsResponse)
+		}
+		case "SEARCH_USERS": {
+			const search = data.search as string
+			const page = data.page as number
+
+			const response = await fetch(
+				`http://localhost:3000/schedule/users?name=${search}&page=${page}`,
+				{ credentials: "include" }
+      )
+
+			return (result = {
+				type: "SearchResponse",
+				page,
+				...(await response.json())
+			} satisfies SearchResponse)
+		}
+		default:
+			result = undefined
 	}
 
-	return (await result?.json()) as ApiResponse
+	console.log(result)
+	return result
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const url = new URL(request.url)
-  console.log(url)
 	const weekStart = url.searchParams.get("week_start")
 
 	const data = await fetch(
@@ -38,8 +62,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 		}
 	)
 
-	const schedule = (await data.json()) as ApiResponse<ScheduleWeek>
-	return schedule
+	return (await data.json()) as ApiResponse<ScheduleWeek>
 }
 
 export default function Schedule({
@@ -50,13 +73,14 @@ export default function Schedule({
 	date = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000)
 	date.setUTCHours(0, 0, 0, 0)
 
-  console.log(actionData)
-
 	return (
 		<main className="h-[calc(100vh-69px)] p-4">
 			<ScheduleTable
-				tableData={loaderData?.data}
-				fieldData={actionData?.data}
+				tableData={loaderData.data!}
+				fieldData={
+					(actionData?.type === "DetailsResponse" && actionData?.data) ||
+					undefined
+				}
 			/>
 		</main>
 	)

@@ -75,3 +75,23 @@ export function useScheduleContext() {
 
 	return schedule
 }
+
+export const UserSearchContext = createContext<
+	| {
+			users: Pick<User, "id" | "name">[]
+			add: (user: Pick<User, "id" | "name">) => void
+	  }
+	| undefined
+>(undefined)
+
+export function useUserSearchContext() {
+	const users = useContext(UserSearchContext)
+
+	if (!users) {
+		throw Error(
+			"The users can only be accessed inside the UserSearchContextProvider!"
+		)
+	}
+
+	return users
+}

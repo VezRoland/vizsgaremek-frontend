@@ -1,9 +1,11 @@
+import { useActionData, useSubmit } from "react-router"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { scheduleSchema } from "~/schemas/schedule"
 
 import type { ReactElement } from "react"
+
 import {
 	Dialog,
 	DialogClose,
@@ -15,15 +17,7 @@ import {
 	DialogTrigger
 } from "../ui/dialog"
 import { Button } from "../ui/button"
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage
-} from "../ui/form"
-import { Input } from "../ui/input"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import {
 	Select,
 	SelectContent,
@@ -34,14 +28,16 @@ import {
 import { ScheduleCategory } from "~/types/database"
 import {
 	FlagTriangleLeftIcon,
-	FlagTriangleRight,
 	FlagTriangleRightIcon,
-	HandCoins,
-	Search
+	HandCoins
 } from "lucide-react"
 import { DateTimePicker } from "../ui/datetime-picker"
+import { UserSearch } from "./user-search"
+import { UserSearchProvider } from "./user-search-provider"
 
 export function NewScheduleDialog({ children }: { children: ReactElement }) {
+	const submit = useSubmit()
+
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
@@ -111,40 +107,45 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 								/>
 							</div>
 							<div className="flex gap-2">
-								<div className="flex-1">
-									<Input
-										type="search"
-										icon={<Search size={16} />}
-										placeholder="Search for employees"
-									/>
-								</div>
-								<FormField
-									control={form.control}
-									name="category"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Select
-													onValueChange={field.onChange}
-													defaultValue={field.value}
-												>
-													<SelectTrigger icon={<HandCoins />}>
-														<SelectValue placeholder="Choose a category" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value={String(ScheduleCategory.Paid)}>
-															Paid
-														</SelectItem>
-														<SelectItem value={String(ScheduleCategory.Unpaid)}>
-															Unpaid
-														</SelectItem>
-													</SelectContent>
-												</Select>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<UserSearchProvider>
+									<>
+										<div className="flex-1">
+											<UserSearch />
+										</div>
+										<FormField
+											control={form.control}
+											name="category"
+											render={({ field }) => (
+												<FormItem>
+													<FormControl>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
+															<SelectTrigger icon={<HandCoins />}>
+																<SelectValue placeholder="Choose a category" />
+															</SelectTrigger>
+															<SelectContent>
+																<SelectItem
+																	value={String(ScheduleCategory.Paid)}
+																>
+																	Paid
+																</SelectItem>
+																<SelectItem
+																	value={String(ScheduleCategory.Unpaid)}
+																>
+																	Unpaid
+																</SelectItem>
+															</SelectContent>
+														</Select>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+                    <div></div>
+									</>
+								</UserSearchProvider>
 							</div>
 						</div>
 						<DialogFooter className="gap-2">
