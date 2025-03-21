@@ -1,11 +1,17 @@
 import type { Route } from "./+types/schedule"
 import type { Schedule, User } from "~/types/database"
-import type { ApiResponse, DetailsResponse, SearchResponse } from "~/types/response"
+import type {
+	ApiResponse,
+	DetailsResponse,
+	SearchResponse
+} from "~/types/response"
 import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
 
 import { ScheduleTable } from "~/components/schedule-table/schedule-table"
-
-
+import type { z } from "zod"
+import type { scheduleSchema } from "~/schemas/schedule"
+import { useEffect } from "react"
+import { handleServerResponse } from "~/lib/utils"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
@@ -34,7 +40,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 			const response = await fetch(
 				`http://localhost:3000/schedule/users?name=${search}&page=${page}`,
 				{ credentials: "include" }
-      )
+			)
 
 			return (result = {
 				type: "SearchResponse",
@@ -42,11 +48,27 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 				...(await response.json())
 			} satisfies SearchResponse)
 		}
+		case "CREATE_SCHEDULE": {
+			const newSchedule = data as z.infer<typeof scheduleSchema>
+
+			const response = await fetch("http://localhost:3000/schedule", {
+				method: "POST",
+				body: JSON.stringify(newSchedule),
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include"
+			})
+
+      return (result = {
+				type: "CreateScheduleResponse",
+				...(await response.json())
+			} satisfies ApiResponse)
+		}
 		default:
 			result = undefined
 	}
 
-	console.log(result)
 	return result
 }
 
@@ -72,6 +94,8 @@ export default function Schedule({
 	let date = new Date()
 	date = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000)
 	date.setUTCHours(0, 0, 0, 0)
+
+  useEffect(() => handleServerResponse(actionData), [actionData])
 
 	return (
 		<main className="h-[calc(100vh-69px)] p-4">

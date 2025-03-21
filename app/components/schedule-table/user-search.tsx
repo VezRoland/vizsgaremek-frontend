@@ -1,6 +1,14 @@
-import { useCallback, useState } from "react"
+import {
+	useCallback,
+	useRef,
+	useState,
+	type ChangeEvent,
+	type FocusEventHandler,
+	type MouseEventHandler
+} from "react"
 import { useActionData, useSubmit } from "react-router"
 import debounce from "debounce"
+import * as useClickOutside from "react-click-outside-hook"
 
 import type { SearchResponse } from "~/types/response"
 
@@ -12,6 +20,7 @@ export function UserSearch() {
 	const submit = useSubmit()
 
 	const [open, setOpen] = useState(false)
+	const commandRef = useRef<HTMLDivElement>(null)
 
 	const debouncedSearch = useCallback(
 		debounce((search: string) => {
@@ -31,13 +40,26 @@ export function UserSearch() {
 		debouncedSearch(search)
 	}
 
+	function onBlur({
+		relatedTarget
+	}: React.FocusEvent<HTMLDivElement, Element>) {
+		if (!relatedTarget || !commandRef.current) return
+
+		setOpen(commandRef.current.contains(relatedTarget))
+	}
+
 	return (
-		<Command className="relative overflow-visible">
+		<Command
+			className="z-10 relative overflow-visible"
+			ref={commandRef}
+			onBlur={onBlur}
+		>
 			<CommandInput
 				placeholder="Search for employees"
 				onValueChange={onSearch}
+				onFocus={() => setOpen(true)}
 			/>
-			<CommandList className="z-100 absolute bottom-0 w-full h-max translate-y-full bg-background">
+			<CommandList className="absolute bottom-0 w-full h-max translate-y-full bg-background">
 				{open &&
 					actionData?.type === "SearchResponse" &&
 					actionData.data?.map(user => <UserSearchItem {...user} />)}

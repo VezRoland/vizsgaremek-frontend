@@ -9,15 +9,18 @@ export function UserSearchItem({
 }: Pick<User & Schedule, "id" | "name">) {
 	const searchContext = useUserSearchContext()
 
-	console.log(searchContext.users)
-
 	return (
 		<CommandItem
+			className="p-0"
 			key={id}
 			value={name}
 			disabled={!!searchContext.users.find(user => user.id === id)}
 		>
-			<div className="flex items-center gap-2" onClick={() => searchContext.add({ id, name })}>
+			<div
+				className="w-full flex items-center gap-2 p-2"
+				tabIndex={10}
+				onClick={() => searchContext.add({ id, name })}
+			>
 				<Avatar>
 					<AvatarImage></AvatarImage>
 					<AvatarFallback>{name.substring(0, 1)}</AvatarFallback>

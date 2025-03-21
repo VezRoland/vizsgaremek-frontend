@@ -18,8 +18,16 @@ export function UserSearchProvider({
 		})
 	}
 
+  function remove(userId: string) {
+		setUsers(prevUsers => {
+			let newUsers = [...prevUsers]
+			newUsers = newUsers.filter(user => user.id !== userId)
+			return newUsers
+		})
+  }
+
 	return (
-		<UserSearchContext.Provider value={{ users, add }}>
+		<UserSearchContext.Provider value={{ users, add, remove }}>
 			{children}
 		</UserSearchContext.Provider>
 	)

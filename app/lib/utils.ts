@@ -80,6 +80,7 @@ export const UserSearchContext = createContext<
 	| {
 			users: Pick<User, "id" | "name">[]
 			add: (user: Pick<User, "id" | "name">) => void
+			remove: (userId: string) => void
 	  }
 	| undefined
 >(undefined)

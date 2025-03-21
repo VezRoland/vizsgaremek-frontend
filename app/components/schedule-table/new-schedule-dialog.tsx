@@ -34,8 +34,11 @@ import {
 import { DateTimePicker } from "../ui/datetime-picker"
 import { UserSearch } from "./user-search"
 import { UserSearchProvider } from "./user-search-provider"
+import { UserInput } from "./user-input"
+import { useUserContext } from "~/lib/utils"
 
 export function NewScheduleDialog({ children }: { children: ReactElement }) {
+  const userContext = useUserContext()
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
@@ -44,13 +47,28 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 			start: new Date(),
 			end: new Date(new Date().getTime() + 3600000),
 			category: String(ScheduleCategory.Paid),
-			users: ""
+			user_id: ""
 		}
 	})
 
 	function onSubmit(values: z.infer<typeof scheduleSchema>) {
-		console.log(values)
+    console.log(values)
+		submit(
+			JSON.stringify({
+				type: "CREATE_SCHEDULE",
+				...values,
+        category: parseInt(values.category),
+				user_id: JSON.parse(values.user_id),
+        company_id: userContext.company_id
+			}),
+			{
+				method: "POST",
+				encType: "application/json"
+			}
+		)
 	}
+
+	console.log(form.getValues())
 
 	return (
 		<Dialog>
@@ -106,11 +124,16 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 									)}
 								/>
 							</div>
-							<div className="flex gap-2">
-								<UserSearchProvider>
-									<>
-										<div className="flex-1">
+							<UserSearchProvider>
+								<>
+									<div className="flex gap-2">
+										<div className="flex-1 flex-col">
 											<UserSearch />
+											{form.formState.errors.user_id && (
+												<p className="text-danger">
+													{form.formState.errors.user_id.message}
+												</p>
+											)}
 										</div>
 										<FormField
 											control={form.control}
@@ -143,13 +166,17 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 												</FormItem>
 											)}
 										/>
-                    <div></div>
-									</>
-								</UserSearchProvider>
-							</div>
+									</div>
+									<UserInput
+										onValueChange={value =>
+											form.setValue("user_id", value, { shouldValidate: true })
+										}
+									/>
+								</>
+							</UserSearchProvider>
 						</div>
 						<DialogFooter className="gap-2">
-							<Button>Add</Button>
+							<Button type="submit">Add</Button>
 							<DialogClose className="!m-0" asChild>
 								<Button variant="secondary">Cancel</Button>
 							</DialogClose>

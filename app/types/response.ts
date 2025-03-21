@@ -2,7 +2,7 @@ import type { Schedule, User } from "./database"
 import type { ScheduleWithUser } from "./results"
 
 export interface ApiResponse<D = unknown, E = unknown> {
-	status: "success" | "error"
+	status: "success" | "error" | "ignore"
 	message: string
 	data?: D
 	errors?: E
