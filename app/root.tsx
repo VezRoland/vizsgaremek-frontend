@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { createSupabaseServerClient } from "./lib/supabase"
 import {
 	isRouteErrorResponse,
@@ -8,14 +9,15 @@ import {
 	ScrollRestoration,
 	useActionData
 } from "react-router"
+import { handleServerResponse } from "./lib/utils"
 
 import type { Route } from "./+types/root"
 import type { ApiResponse } from "./types/response"
 
-import "./app.css"
 import { Toaster } from "~/components/ui/sonner"
-import { useEffect } from "react"
-import { handleServerResponse } from "./lib/utils"
+import { LoadingBar } from "./components/navbar/loading-bar"
+
+import "./app.css"
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -58,6 +60,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
+        <LoadingBar />
 				{children}
 				<Toaster />
 				<ScrollRestoration />

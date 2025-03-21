@@ -8,8 +8,8 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger
-} from "./ui/dropdown-menu"
-import { Button } from "./ui/button"
+} from "../ui/dropdown-menu"
+import { Button } from "../ui/button"
 
 export interface Route {
 	name: string
@@ -21,16 +21,14 @@ export default function NavbarItem({ name, path, minRole }: Route) {
 	const user = useUserContext()
 	const { pathname } = useLocation()
 
-  if (user.role < minRole) return
+	if (user.role < minRole) return
 
 	if (Array.isArray(path)) {
 		return (
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-          <Button variant={"ghost"}>
-            {name}
-          </Button>
-        </DropdownMenuTrigger>
+					<Button variant={"ghost"}>{name}</Button>
+				</DropdownMenuTrigger>
 				<DropdownMenuContent>
 					{path.map(
 						route =>

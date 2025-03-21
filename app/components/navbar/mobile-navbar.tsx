@@ -9,18 +9,18 @@ import {
 	DrawerFooter,
 	DrawerHeader,
 	DrawerTrigger
-} from "./ui/drawer"
+} from "../ui/drawer"
 import { LogOut, MenuIcon, X } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 import NavbarItem from "./navbar-item"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger
-} from "./ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import ActionLoadingWrapper from "./action-loading-wrapper"
+} from "../ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import ActionLoadingWrapper from "../action-loading-wrapper"
 
 export default function MobileNavbar({
 	routes,
@@ -32,7 +32,7 @@ export default function MobileNavbar({
 	const user = useUserContext()
 
 	return (
-		<nav className="sticky top-0 left-0 max-w-full flex justify-between p-4 border-b">
+		<nav className="sticky top-0 left-0 max-w-full flex justify-between p-4 border-b bg-background/25 backdrop-blur-md">
 			<img className="h-9" src="favicon.ico" alt="" />
 			<Drawer direction="right">
 				<DrawerTrigger asChild>
@@ -42,7 +42,7 @@ export default function MobileNavbar({
 				</DrawerTrigger>
 				<DrawerContent className="h-full">
 					<DrawerHeader className="flex justify-between">
-            <img className="h-9" src="favicon.ico" alt="" />
+						<img className="h-9" src="favicon.ico" alt="" />
 						<DrawerClose asChild>
 							<Button size="icon" variant="ghost">
 								<X />
