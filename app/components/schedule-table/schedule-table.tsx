@@ -3,7 +3,7 @@ import { Link, useSubmit } from "react-router"
 import { ScheduleContext } from "~/lib/utils"
 
 import { ScheduleCategory } from "~/types/database"
-import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
+import type { ScheduleWeek, DetailsUser } from "~/types/results"
 
 import { Button } from "../ui/button"
 import { ScheduleTableItem } from "./schedule-table-item"
@@ -33,7 +33,7 @@ export function ScheduleTable({
 	fieldData
 }: {
 	tableData: ScheduleWeek
-	fieldData?: ScheduleWithUser[]
+	fieldData?: DetailsUser[]
 }) {
 	const submit = useSubmit()
 	const date = new Date()
@@ -101,8 +101,8 @@ export function ScheduleTable({
 					</div>
 				</div>
 				<div className="w-full flex-1 border-b rounded-md text-nowrap bg-accent overflow-auto">
-					<table className="relative w-full table-fixed">
-						<thead className="sticky top-0 border-2 border-accent text-accent-foreground bg-accent">
+					<table className="relative isolate w-full table-fixed">
+						<thead className="z-10 sticky top-0 border-2 border-accent text-accent-foreground bg-accent">
 							<tr>
 								{days.map((day, i) => (
 									<th className="w-32 p-2 border border-accent" key={day}>

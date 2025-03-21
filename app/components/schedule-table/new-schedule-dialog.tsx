@@ -1,4 +1,4 @@
-import { useActionData, useSubmit } from "react-router"
+import { useSubmit } from "react-router"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,7 +25,7 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "../ui/select"
-import { ScheduleCategory } from "~/types/database"
+import { ScheduleCategory, UserRole } from "~/types/database"
 import {
 	FlagTriangleLeftIcon,
 	FlagTriangleRightIcon,
@@ -35,10 +35,11 @@ import { DateTimePicker } from "../ui/datetime-picker"
 import { UserSearch } from "./user-search"
 import { UserSearchProvider } from "./user-search-provider"
 import { UserInput } from "./user-input"
-import { useUserContext } from "~/lib/utils"
+import { cn, useUserContext } from "~/lib/utils"
+import { hasPermission } from "~/lib/roles"
 
 export function NewScheduleDialog({ children }: { children: ReactElement }) {
-  const userContext = useUserContext()
+	const userContext = useUserContext()
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
@@ -47,19 +48,21 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 			start: new Date(),
 			end: new Date(new Date().getTime() + 3600000),
 			category: String(ScheduleCategory.Paid),
-			user_id: ""
+			user_id:
+				userContext.role < UserRole.Leader
+					? JSON.stringify([userContext.id])
+					: ""
 		}
 	})
 
 	function onSubmit(values: z.infer<typeof scheduleSchema>) {
-    console.log(values)
 		submit(
 			JSON.stringify({
 				type: "CREATE_SCHEDULE",
 				...values,
-        category: parseInt(values.category),
-				user_id: JSON.parse(values.user_id),
-        company_id: userContext.company_id
+				category: parseInt(values.category),
+				user_id: [...JSON.parse(values.user_id)],
+				company_id: userContext.company_id
 			}),
 			{
 				method: "POST",
@@ -67,8 +70,6 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 			}
 		)
 	}
-
-	console.log(form.getValues())
 
 	return (
 		<Dialog>
@@ -86,7 +87,7 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 						onSubmit={form.handleSubmit(onSubmit)}
 					>
 						<div className="flex flex-col gap-4 py-4">
-							<div className="flex flex-wrap md:grid-cols-2 gap-2">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 								<FormField
 									control={form.control}
 									name="start"
@@ -127,19 +128,27 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 							<UserSearchProvider>
 								<>
 									<div className="flex gap-2">
-										<div className="flex-1 flex-col">
-											<UserSearch />
-											{form.formState.errors.user_id && (
-												<p className="text-danger">
-													{form.formState.errors.user_id.message}
-												</p>
-											)}
-										</div>
+										{userContext.role > UserRole.Employee ? (
+											<div className="flex-1 flex-col">
+												<UserSearch />
+												{form.formState.errors.user_id && (
+													<p className="text-danger">
+														{form.formState.errors.user_id.message}
+													</p>
+												)}
+											</div>
+										) : (
+											<input type="hidden" {...form.register("user_id")} />
+										)}
 										<FormField
 											control={form.control}
 											name="category"
 											render={({ field }) => (
-												<FormItem>
+												<FormItem
+													className={cn(
+														userContext.role < UserRole.Leader && "flex-1"
+													)}
+												>
 													<FormControl>
 														<Select
 															onValueChange={field.onChange}
@@ -167,11 +176,15 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 											)}
 										/>
 									</div>
-									<UserInput
-										onValueChange={value =>
-											form.setValue("user_id", value, { shouldValidate: true })
-										}
-									/>
+									{userContext.role > UserRole.Employee && (
+										<UserInput
+											onValueChange={value =>
+												form.setValue("user_id", value, {
+													shouldValidate: true
+												})
+											}
+										/>
+									)}
 								</>
 							</UserSearchProvider>
 						</div>

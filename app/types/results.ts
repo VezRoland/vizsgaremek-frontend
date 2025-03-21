@@ -1,7 +1,14 @@
-import type { Schedule, User } from "./database"
+import type { Schedule, User, UserRole } from "./database"
 
-export interface ScheduleWithUser extends Omit<Schedule, "user_id"> {
-  user: { avatar_url: string } & Pick<User, "name">
+export interface DetailsUser {
+  id: string,
+  category: UserRole,
+  start: string,
+  end: string,
+  user: {
+    name: string,
+    avatar_url: string | null
+  }
 }
 
 export interface ScheduleWeek {

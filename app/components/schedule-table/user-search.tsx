@@ -62,7 +62,9 @@ export function UserSearch() {
 			<CommandList className="absolute bottom-0 w-full h-max translate-y-full bg-background">
 				{open &&
 					actionData?.type === "SearchResponse" &&
-					actionData.data?.map(user => <UserSearchItem {...user} />)}
+					actionData.data?.map(user => (
+						<UserSearchItem key={user.id} {...user} />
+					))}
 			</CommandList>
 		</Command>
 	)

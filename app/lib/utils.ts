@@ -6,7 +6,7 @@ import { toast } from "sonner"
 
 import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
-import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
+import type { ScheduleWeek, DetailsUser } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -61,7 +61,7 @@ export function useUserContext() {
 }
 
 export const ScheduleContext = createContext<
-	{ tableData: ScheduleWeek; fieldData?: ScheduleWithUser[] } | undefined
+	{ tableData: ScheduleWeek; fieldData?: DetailsUser[] } | undefined
 >(undefined)
 
 export function useScheduleContext() {

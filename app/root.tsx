@@ -5,11 +5,12 @@ import {
 	Meta,
 	Outlet,
 	Scripts,
-	ScrollRestoration
+	ScrollRestoration,
+	useActionData
 } from "react-router"
 
 import type { Route } from "./+types/root"
-import type { ServerResponse } from "./types/response"
+import type { ApiResponse } from "./types/response"
 
 import "./app.css"
 import { Toaster } from "~/components/ui/sonner"
@@ -36,11 +37,10 @@ export async function action({ request }: Route.ActionArgs) {
 
 	return Response.json(
 		{
-			error: false,
+			status: "success",
 			type: "message",
-			message: "Sikeres kijelentkezés!",
-			messageType: "success"
-		} as ServerResponse,
+			message: "Successfully signed out."
+		} as ApiResponse,
 		{
 			headers,
 			status: 200
@@ -67,8 +67,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	)
 }
 
-export default function App({ actionData }: Route.ComponentProps) {
-	useEffect(() => handleServerResponse(actionData), [actionData])
+export default function App() {
+	const actionData = useActionData<ApiResponse>()
+
+	useEffect(() => {
+		if (!actionData?.errors) {
+			handleServerResponse(actionData)
+		}
+	}, [actionData])
 
 	return <Outlet />
 }

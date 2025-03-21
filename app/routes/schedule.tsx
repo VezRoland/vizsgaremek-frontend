@@ -1,17 +1,18 @@
+import { useEffect } from "react"
+import type { z } from "zod"
+import type { scheduleSchema } from "~/schemas/schedule"
+import { handleServerResponse } from "~/lib/utils"
+
 import type { Route } from "./+types/schedule"
-import type { Schedule, User } from "~/types/database"
+import type { Schedule } from "~/types/database"
 import type {
 	ApiResponse,
 	DetailsResponse,
 	SearchResponse
 } from "~/types/response"
-import type { ScheduleWeek, ScheduleWithUser } from "~/types/results"
+import type { ScheduleWeek } from "~/types/results"
 
 import { ScheduleTable } from "~/components/schedule-table/schedule-table"
-import type { z } from "zod"
-import type { scheduleSchema } from "~/schemas/schedule"
-import { useEffect } from "react"
-import { handleServerResponse } from "~/lib/utils"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
@@ -32,6 +33,26 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 				type: "DetailsResponse",
 				...(await response.json())
 			} satisfies DetailsResponse)
+		}
+		case "EDIT_DETAILS": {
+			const id = data.id as string
+			const start = data.start as string
+			const end = data.end as string
+
+			const response = await fetch(
+				`http://localhost:3000/schedule/update/${id}`,
+				{
+					method: "PATCH",
+					body: JSON.stringify({ start, end }),
+					headers: { "Content-Type": "application/json" },
+					credentials: "include"
+				}
+			)
+
+      return (result = {
+				type: "EditDetailsResponse",
+				...(await response.json())
+			} satisfies ApiResponse)
 		}
 		case "SEARCH_USERS": {
 			const search = data.search as string
@@ -60,7 +81,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 				credentials: "include"
 			})
 
-      return (result = {
+			return (result = {
 				type: "CreateScheduleResponse",
 				...(await response.json())
 			} satisfies ApiResponse)
@@ -95,7 +116,7 @@ export default function Schedule({
 	date = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000)
 	date.setUTCHours(0, 0, 0, 0)
 
-  useEffect(() => handleServerResponse(actionData), [actionData])
+	useEffect(() => handleServerResponse(actionData), [actionData])
 
 	return (
 		<main className="h-[calc(100vh-69px)] p-4">
@@ -103,7 +124,7 @@ export default function Schedule({
 				tableData={loaderData.data!}
 				fieldData={
 					(actionData?.type === "DetailsResponse" && actionData?.data) ||
-					undefined
+					[]
 				}
 			/>
 		</main>

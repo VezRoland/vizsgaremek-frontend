@@ -1,5 +1,5 @@
 import type { Schedule, User } from "./database"
-import type { ScheduleWithUser } from "./results"
+import type { DetailsUser } from "./results"
 
 export interface ApiResponse<D = unknown, E = unknown> {
 	status: "success" | "error" | "ignore"
@@ -8,7 +8,7 @@ export interface ApiResponse<D = unknown, E = unknown> {
 	errors?: E
 }
 
-export interface DetailsResponse extends ApiResponse<ScheduleWithUser[]> {
+export interface DetailsResponse extends ApiResponse<DetailsUser[]> {
 	type: "DetailsResponse"
 }
 

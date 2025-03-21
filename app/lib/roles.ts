@@ -1,5 +1,5 @@
 import { UserRole } from "../types/database"
-import type { Ticket, User } from "../types/database"
+import type { Schedule, Ticket, User } from "../types/database"
 
 type PermissionCheck<Key extends keyof Permissions> =
 	| boolean
@@ -17,7 +17,11 @@ type Permissions = {
 	tickets: {
 		dataType: Ticket
 		action: "view" | "create" | "delete" | "close" | "respond"
-	}
+	},
+  schedules: {
+    dataType: Schedule
+    action: "view" | "create" | "delete" | "finalize"
+  }
 }
 
 const ROLES = {
@@ -37,7 +41,13 @@ const ROLES = {
 			delete: (user, data) => user.company_id === data.company_id,
 			close: (user, data) => user.company_id === data.company_id,
 			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
-		}
+		},
+    schedules: {
+      view: true,
+      create: true,
+      delete: true,
+      finalize: true
+    }
 	},
 	[UserRole.Leader]: {
 		tickets: {
@@ -46,7 +56,13 @@ const ROLES = {
 			delete: (user, data) => user.company_id === data.company_id,
 			close: (user, data) => user.company_id === data.company_id,
 			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
-		}
+		},
+    schedules: {
+      view: true,
+      create: true,
+      delete: true,
+      finalize: true
+    }
 	},
 	[UserRole.Employee]: {
 		tickets: {
@@ -55,7 +71,13 @@ const ROLES = {
 			delete: false,
 			close: false,
 			respond: (user, data) => user.id === data.user_id,
-		}
+		},
+    schedules: {
+      view: true,
+      create: true,
+      delete: false,
+      finalize: false
+    }
 	}
 } as const satisfies RolesWithPermissions
 

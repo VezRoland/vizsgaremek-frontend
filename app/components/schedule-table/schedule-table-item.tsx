@@ -1,5 +1,5 @@
 import { useSubmit } from "react-router"
-import { cn, useScheduleContext } from "~/lib/utils"
+import { cn, useScheduleContext, useUserContext } from "~/lib/utils"
 
 import {
 	Dialog,
@@ -11,6 +11,16 @@ import {
 	DialogTrigger
 } from "../ui/dialog"
 import { Button } from "../ui/button"
+import { UsersTable } from "./users-table"
+import { UserRole } from "~/types/database"
+import { hasPermission } from "~/lib/roles"
+import { useForm } from "react-hook-form"
+import type { z } from "zod"
+import { scheduleSchema } from "~/schemas/schedule"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
+import { DateTimePicker } from "../ui/datetime-picker"
+import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
 
 export function ScheduleTableItem({
 	row,
@@ -20,8 +30,19 @@ export function ScheduleTableItem({
 	column: number
 }) {
 	const { tableData, fieldData } = useScheduleContext()
+	const userContext = useUserContext()
 	const submit = useSubmit()
 	const data = tableData.schedule[`${row}-${column}`] || []
+
+	const form = useForm<z.infer<typeof scheduleSchema>>({
+		resolver: zodResolver(scheduleSchema),
+		defaultValues: {
+			category: String(fieldData?.at(0)?.category || 1),
+			start: new Date(fieldData?.at(0)?.start || new Date()),
+			end: new Date(fieldData?.at(0)?.end || new Date()),
+			user_id: userContext.id
+		}
+	})
 
 	function getToday() {
 		const today = new Date().getDay()
@@ -41,7 +62,7 @@ export function ScheduleTableItem({
 		return days[column]
 	}
 
-  async function getDetailS() {
+	async function getDetailS() {
 		await submit(
 			{
 				type: "VIEW_DETAILS",
@@ -51,11 +72,26 @@ export function ScheduleTableItem({
 			},
 			{ method: "POST", encType: "application/json" }
 		)
-  }
+	}
 
 	async function onOpenChange(open: boolean) {
 		if (!open) return
-    getDetailS()
+		getDetailS()
+	}
+
+	function onSubmit(values: z.infer<typeof scheduleSchema>) {
+		submit(
+			JSON.stringify({
+				type: "EDIT_SCHEDULE",
+				id: fieldData![0].id,
+				start: values.start,
+				end: values.end
+			}),
+			{
+				method: "POST",
+				encType: "application/json"
+			}
+		)
 	}
 
 	if (typeof data !== "number" || data === 0)
@@ -68,8 +104,6 @@ export function ScheduleTableItem({
 			></td>
 		)
 
-    console.log(fieldData)
-
 	return (
 		<Dialog onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>
@@ -80,28 +114,79 @@ export function ScheduleTableItem({
 					)}
 				>
 					<div className="flex flex-col px-4 py-2">
-						<span className="text-sm text-muted-foreground">
-							{row.toString().padStart(2, "0")}:00
+						<span
+							className={cn(
+								"text-sm text-muted-foreground",
+								userContext.role < UserRole.Leader && "text-foreground"
+							)}
+						>
+							{(row).toString().padStart(2, "0")}:00
 						</span>
-						<span className="text-lg font-medium">
-							{data} {data > 1 ? "employees" : "employee"}
-						</span>
+						{userContext.role > UserRole.Employee && (
+							<span className="text-lg font-medium">
+								{data} {data > 1 ? "employees" : "employee"}
+							</span>
+						)}
 					</div>
 				</td>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{getDayName()} - {`${row.toString().padStart(2, "0")}:00`}
+						{getDayName()} - {`${(row).toString().padStart(2, "0")}:00`}
 					</DialogTitle>
 				</DialogHeader>
-        <ul>
-          {fieldData?.map(data => (
-            <li>{data.user.name}</li>
-          ))}
-        </ul>
+				{userContext.role > UserRole.Employee ? (
+					<UsersTable />
+				) : (
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)}>
+							<FormField
+								control={form.control}
+								name="start"
+								render={({ field }) => (
+									<FormItem className="flex-1">
+										<FormControl>
+											<DateTimePicker
+												className="overflow-clip"
+												icon={<FlagTriangleRightIcon />}
+												granularity="minute"
+												value={field.value}
+												onChange={field.onChange}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="end"
+								render={({ field }) => (
+									<FormItem className="flex-1">
+										<FormControl>
+											<DateTimePicker
+												className="max-w-full text-clip"
+												icon={<FlagTriangleLeftIcon />}
+												granularity="minute"
+												value={field.value}
+												onChange={field.onChange}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</form>
+					</Form>
+				)}
 				<DialogFooter className="gap-2">
-					<Button type="submit">Finalize</Button>
+					{hasPermission(userContext, "schedules", "finalize") && (
+						<Button type="submit">Finalize</Button>
+					)}
+					{userContext.role < UserRole.Leader && (
+						<Button type="submit">Edit</Button>
+					)}
 					<DialogClose className="!m-0" asChild>
 						<Button variant="secondary">Cancel</Button>
 					</DialogClose>
