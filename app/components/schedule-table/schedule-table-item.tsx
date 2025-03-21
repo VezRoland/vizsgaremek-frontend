@@ -98,7 +98,7 @@ export function ScheduleTableItem({
 		return (
 			<td
 				className={cn(
-					"p-6 border group-last:border-b-0",
+					"h-16 p-6 border group-last:border-b-0",
 					getToday() === column + 1 && "border-b-background bg-primary/25"
 				)}
 			></td>
@@ -109,7 +109,7 @@ export function ScheduleTableItem({
 			<DialogTrigger asChild>
 				<td
 					className={cn(
-						"relative border group-last:border-b-0",
+						"relative h-16 border group-last:border-b-0",
 						getToday() === column + 1 && "border-b-background bg-primary/25"
 					)}
 				>

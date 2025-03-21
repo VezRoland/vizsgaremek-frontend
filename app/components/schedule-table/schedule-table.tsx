@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
+import { ChevronLeft, ChevronRight, HandCoins, Plus } from "lucide-react"
 import { Link, useSubmit } from "react-router"
 import { ScheduleContext } from "~/lib/utils"
 
@@ -78,9 +78,9 @@ export function ScheduleTable({
 							</Button>
 						</Link>
 					</div>
-					<div className="w-max min-w-[min(215px,100%)] flex flex-[999] gap-4">
+					<div className="w-max flex flex-[999] gap-4">
 						<Select defaultValue="all">
-							<SelectTrigger className="max-w-60 ml-auto">
+							<SelectTrigger className="max-w-max ml-auto" icon={<HandCoins />}>
 								<SelectValue placeholder="Choose a category" />
 							</SelectTrigger>
 							<SelectContent>
