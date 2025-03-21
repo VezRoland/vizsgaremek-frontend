@@ -5,5 +5,8 @@
 /.react-router/
 /build/
 
+# IntelliJ based IDEs
+.idea
+
 .env
 supabase
