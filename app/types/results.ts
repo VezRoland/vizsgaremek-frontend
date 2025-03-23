@@ -17,3 +17,10 @@ export interface ScheduleWeek {
   nextDate: number | null,
 	schedule: { [key: string]: number }
 }
+
+export interface TrainingSubmission {
+  name: string,
+  training: string,
+  score: string,
+  submittedAt: string
+}

@@ -24,17 +24,33 @@ export interface Company {
 }
 
 export interface Schedule {
-  id: string,
-  start: string,
-  end: string,
-  category: ScheduleCategory,
-  user_id: string
-  company_id: string
+	id: string
+	start: string
+	end: string
+	category: ScheduleCategory
+	user_id: string
+	company_id: string
 }
 
 export enum ScheduleCategory {
-  Paid = 1,
-  Unpaid
+	Paid = 1,
+	Unpaid
+}
+
+export interface Training {
+	id: string
+	name: string
+	description: string
+	file_url: string
+	created_at: string
+}
+
+export interface TrainingQuestion {
+  id: string,
+  name: string,
+  answers: string[],
+  training_id: string,
+  created_at: string
 }
 
 export interface Ticket {
@@ -49,8 +65,8 @@ export interface Ticket {
 
 export interface TicketResponse {
 	id: string
-	content: string,
-  name: string,
+	content: string
+	name: string
 	user_id: string
 	ticket_id: string
 	company_id: string
