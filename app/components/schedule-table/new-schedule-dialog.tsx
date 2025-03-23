@@ -4,7 +4,7 @@ import type { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { scheduleSchema } from "~/schemas/schedule"
 
-import type { ReactElement } from "react"
+import { useEffect, useState, type ReactElement } from "react"
 
 import {
 	Dialog,
@@ -13,6 +13,7 @@ import {
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
+	DialogOverlay,
 	DialogTitle,
 	DialogTrigger
 } from "../ui/dialog"
@@ -37,10 +38,12 @@ import { UserSearchProvider } from "./user-search-provider"
 import { UserInput } from "./user-input"
 import { cn, useUserContext } from "~/lib/utils"
 import { hasPermission } from "~/lib/roles"
+import ActionLoadingWrapper from "../action-loading-wrapper"
 
 export function NewScheduleDialog({ children }: { children: ReactElement }) {
 	const userContext = useUserContext()
 	const submit = useSubmit()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
@@ -54,6 +57,7 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 					: ""
 		}
 	})
+  const { formState } = form
 
 	function onSubmit(values: z.infer<typeof scheduleSchema>) {
 		submit(
@@ -71,8 +75,13 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 		)
 	}
 
+  function onOpenChange() {
+    if (!formState.isSubmitting) return setDialogOpen(!dialogOpen)
+    setDialogOpen(true)
+  }
+
 	return (
-		<Dialog>
+		<Dialog open={dialogOpen} onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="flex flex-col">
 				<DialogHeader>
@@ -189,7 +198,10 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 							</UserSearchProvider>
 						</div>
 						<DialogFooter className="gap-2">
-							<Button type="submit">Add</Button>
+              {formState.isSubmitting && "SUBMITTING"}
+              <ActionLoadingWrapper type="CREATE_SCHEDULE">
+                <Button type="submit">Add</Button>
+              </ActionLoadingWrapper>
 							<DialogClose className="!m-0" asChild>
 								<Button variant="secondary">Cancel</Button>
 							</DialogClose>

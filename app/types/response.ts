@@ -13,7 +13,7 @@ export interface DetailsResponse extends ApiResponse<DetailsUser[]> {
 }
 
 export interface SearchResponse
-	extends ApiResponse<Pick<User & Schedule, "id" | "name">[]> {
+	extends ApiResponse<User[]> {
 	type: "SearchResponse"
 	page: number
 }

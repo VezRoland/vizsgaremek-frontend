@@ -104,6 +104,8 @@ export function ScheduleTableItem({
 			></td>
 		)
 
+  console.log(fieldData)
+
 	return (
 		<Dialog onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>

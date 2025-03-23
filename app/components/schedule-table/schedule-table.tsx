@@ -35,7 +35,6 @@ export function ScheduleTable({
 	tableData: ScheduleWeek
 	fieldData?: DetailsUser[]
 }) {
-	const submit = useSubmit()
 	const date = new Date()
 
 	const pastLimit = new Date(date)

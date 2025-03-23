@@ -90,6 +90,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 			result = undefined
 	}
 
+  console.log(result)
 	return result
 }
 
