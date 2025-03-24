@@ -43,7 +43,7 @@ import ActionLoadingWrapper from "../action-loading-wrapper"
 export function NewScheduleDialog({ children }: { children: ReactElement }) {
 	const userContext = useUserContext()
 	const submit = useSubmit()
-  const [dialogOpen, setDialogOpen] = useState(false)
+	const [dialogOpen, setDialogOpen] = useState(false)
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
@@ -57,7 +57,7 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 					: ""
 		}
 	})
-  const { formState } = form
+	const { formState } = form
 
 	function onSubmit(values: z.infer<typeof scheduleSchema>) {
 		submit(
@@ -75,10 +75,10 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 		)
 	}
 
-  function onOpenChange() {
-    if (!formState.isSubmitting) return setDialogOpen(!dialogOpen)
-    setDialogOpen(true)
-  }
+	function onOpenChange() {
+		if (!formState.isSubmitting) return setDialogOpen(!dialogOpen)
+		setDialogOpen(true)
+	}
 
 	return (
 		<Dialog open={dialogOpen} onOpenChange={onOpenChange}>
@@ -138,14 +138,18 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 								<>
 									<div className="flex gap-2">
 										{userContext.role > UserRole.Employee ? (
-											<div className="flex-1 flex-col">
-												<UserSearch />
-												{form.formState.errors.user_id && (
-													<p className="text-danger">
-														{form.formState.errors.user_id.message}
-													</p>
+											<FormField
+												control={form.control}
+												name="user_id"
+												render={() => (
+													<FormItem className="flex-1 flex-col">
+														<FormControl>
+															<UserSearch />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
 												)}
-											</div>
+											/>
 										) : (
 											<input type="hidden" {...form.register("user_id")} />
 										)}
@@ -187,21 +191,20 @@ export function NewScheduleDialog({ children }: { children: ReactElement }) {
 									</div>
 									{userContext.role > UserRole.Employee && (
 										<UserInput
-											onValueChange={value =>
-												form.setValue("user_id", value, {
-													shouldValidate: true
-												})
-											}
+											onValueChange={value => {
+												form.setValue("user_id", value)
+												form.trigger("user_id")
+											}}
 										/>
 									)}
 								</>
 							</UserSearchProvider>
 						</div>
 						<DialogFooter className="gap-2">
-              {formState.isSubmitting && "SUBMITTING"}
-              <ActionLoadingWrapper type="CREATE_SCHEDULE">
-                <Button type="submit">Add</Button>
-              </ActionLoadingWrapper>
+							{formState.isSubmitting && "SUBMITTING"}
+							<ActionLoadingWrapper type="CREATE_SCHEDULE">
+								<Button type="submit">Add</Button>
+							</ActionLoadingWrapper>
 							<DialogClose className="!m-0" asChild>
 								<Button variant="secondary">Cancel</Button>
 							</DialogClose>

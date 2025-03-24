@@ -30,6 +30,7 @@ export function ScheduleTableItem({
 	column: number
 }) {
 	const { tableData, fieldData } = useScheduleContext()
+  const { schedules } = fieldData!
 	const userContext = useUserContext()
 	const submit = useSubmit()
 	const data = tableData.schedule[`${row}-${column}`] || []
@@ -37,9 +38,9 @@ export function ScheduleTableItem({
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
-			category: String(fieldData?.at(0)?.category || 1),
-			start: new Date(fieldData?.at(0)?.start || new Date()),
-			end: new Date(fieldData?.at(0)?.end || new Date()),
+			category: "1",
+			start: new Date(),
+			end: new Date(),
 			user_id: userContext.id
 		}
 	})
@@ -83,7 +84,7 @@ export function ScheduleTableItem({
 		submit(
 			JSON.stringify({
 				type: "EDIT_SCHEDULE",
-				id: fieldData![0].id,
+				id: schedules![0].id,
 				start: values.start,
 				end: values.end
 			}),
@@ -103,8 +104,6 @@ export function ScheduleTableItem({
 				)}
 			></td>
 		)
-
-  console.log(fieldData)
 
 	return (
 		<Dialog onOpenChange={onOpenChange}>

@@ -11,15 +11,17 @@ import { UserSearchItem } from "./user-search-item"
 import { InView } from "react-intersection-observer"
 
 export function UserSearch() {
-	const actionData: SearchResponse | undefined = useActionData()
+	const actionData = useActionData<SearchResponse>()
 	const submit = useSubmit()
 
 	const [data, setData] = useState<{
+		search: string
 		users: User[]
 		page: number
 	}>({
+		search: "",
 		users: [],
-		page: 0
+		page: 1
 	})
 
 	const [open, setOpen] = useState(false)
@@ -34,7 +36,7 @@ export function UserSearch() {
 	)
 
 	function searchUser(search: string, page = data.page) {
-		console.log(search, page)
+		if (actionData?.data && page > actionData.data.pagination.totalPages) return
 
 		submit(
 			JSON.stringify({
@@ -47,7 +49,8 @@ export function UserSearch() {
 
 		setData(prevData => {
 			const newData = { ...prevData }
-			newData.page = page
+			if (search !== prevData.search) newData.users = []
+			newData.search = search
 			return newData
 		})
 	}
@@ -62,8 +65,10 @@ export function UserSearch() {
 	useEffect(() => {
 		if (actionData?.type !== "SearchResponse") return
 		setData(prevData => {
+			if (!actionData?.data) return prevData
 			const newData = { ...prevData }
-			newData.users = [...newData.users, ...(actionData.data || [])]
+			newData.users = [...newData.users, ...(actionData.data.users || [])]
+			newData.page = actionData.data.pagination.currentPage
 			return newData
 		})
 	}, [actionData])
@@ -89,7 +94,7 @@ export function UserSearch() {
 						<InView
 							onChange={inView =>
 								inView
-									? searchUser(inputRef.current?.value || "", data.page + 1)
+									? searchUser(inputRef.current?.value || "", data.page)
 									: null
 							}
 						>

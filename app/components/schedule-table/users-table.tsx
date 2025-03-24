@@ -129,10 +129,9 @@ export function UsersTable() {
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({})
 	const [rowSelection, setRowSelection] = React.useState({})
-	const [page, setPage] = React.useState(1)
 
 	const table = useReactTable<DetailsUser>({
-		data: fieldData || [],
+		data: fieldData?.schedules || [],
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
@@ -142,6 +141,7 @@ export function UsersTable() {
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
+    pageCount: fieldData?.pagination.totalPages,
 		state: {
 			sorting,
 			columnFilters,

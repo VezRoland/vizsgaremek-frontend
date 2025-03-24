@@ -1,5 +1,5 @@
-import type { Schedule, User } from "./database"
-import type { DetailsUser } from "./results"
+import type { User } from "./database"
+import type { Pagination, ScheduleDetails, UserSearch } from "./results"
 
 export interface ApiResponse<D = unknown, E = unknown> {
 	status: "success" | "error" | "ignore"
@@ -8,12 +8,10 @@ export interface ApiResponse<D = unknown, E = unknown> {
 	errors?: E
 }
 
-export interface DetailsResponse extends ApiResponse<DetailsUser[]> {
+export interface DetailsResponse extends ApiResponse<ScheduleDetails> {
 	type: "DetailsResponse"
 }
 
-export interface SearchResponse
-	extends ApiResponse<User[]> {
+export interface SearchResponse extends ApiResponse<UserSearch> {
 	type: "SearchResponse"
-	page: number
 }

@@ -6,7 +6,7 @@ import { toast } from "sonner"
 
 import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
-import type { ScheduleWeek, DetailsUser } from "~/types/results"
+import type { ScheduleWeek, DetailsUser, ScheduleDetails } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -20,6 +20,8 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 	}
 ) => {
 	if (!response) return
+
+  console.log(response)
 
 	if (response.errors) {
 		if (!options?.form) return
@@ -44,7 +46,7 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 		success: () => toast.success(response.message)
 	} as Record<string, () => any>
 
-	messageToasts[response.status]()
+	if (response.status !== "ignore") messageToasts[response.status]()
 	if (response.status !== "error" && options?.callback) options.callback()
 }
 
@@ -61,7 +63,7 @@ export function useUserContext() {
 }
 
 export const ScheduleContext = createContext<
-	{ tableData: ScheduleWeek; fieldData?: DetailsUser[] } | undefined
+	{ tableData: ScheduleWeek; fieldData?: ScheduleDetails } | undefined
 >(undefined)
 
 export function useScheduleContext() {
