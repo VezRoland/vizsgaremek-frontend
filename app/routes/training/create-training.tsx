@@ -30,7 +30,7 @@ export default function CreateTraining() {
 		fields: questionFields,
 		append: appendQuestion,
 		remove: removeQuestion,
-		update: updateQuestion
+		update: updateQuestions
 	} = useFieldArray({
 		control: form.control,
 		name: "questions"
@@ -53,7 +53,7 @@ export default function CreateTraining() {
 	function handleAddAnswer(questionIndex: number) {
 		const currentQuestion = form.watch(`questions.${questionIndex}`)!
 		currentQuestion.answers.push({ text: "", correct: false })
-		updateQuestion(questionIndex, currentQuestion)
+		updateQuestions(questionIndex, currentQuestion)
 	}
 
 	async function onSubmit(values: z.infer<typeof trainingSchema>) {
@@ -62,6 +62,8 @@ export default function CreateTraining() {
 				resolve(values)
 			}, 3000)
 		})
+
+    console.log(awaitedValues)
 	}
 
 	return (

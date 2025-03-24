@@ -37,22 +37,6 @@ export enum ScheduleCategory {
 	Unpaid
 }
 
-export interface Training {
-	id: string
-	name: string
-	description: string
-	file_url: string
-	created_at: string
-}
-
-export interface TrainingQuestion {
-  id: string,
-  name: string,
-  answers: string[],
-  training_id: string,
-  created_at: string
-}
-
 export interface Ticket {
 	id: string
 	title: string

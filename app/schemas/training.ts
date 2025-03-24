@@ -1,11 +1,11 @@
 import { array, object, string, instanceof as instanceof_, boolean } from "zod"
 
-export const trainingAnswerSchema = object({
+const trainingAnswerSchema = object({
 	text: string().min(1, "The answer is required"),
 	correct: boolean()
 })
 
-export const trainingQuestionSchema = object({
+const trainingQuestionSchema = object({
 	name: string().min(1, "The title is required"),
 	answers: array(trainingAnswerSchema)
 		.min(2, "At least 2 answers are required")
@@ -22,4 +22,14 @@ export const trainingSchema = object({
 		1,
 		"The test should contain at least 1 question"
 	)
+})
+
+const trainingSubmissionQuestionSchema = object({
+  id: string(),
+  answers: string().array().min(1, "At least one answer should be selected")
+})
+
+export const trainingSubmissionSchema = object({
+  id: string(),
+  questions: array(trainingSubmissionQuestionSchema)
 })
