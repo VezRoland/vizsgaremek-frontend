@@ -1,28 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { useActionData, useSubmit } from "react-router"
+import { useCallback, useRef, useState } from "react"
+import { useSearchParams, useSubmit } from "react-router"
 import debounce from "debounce"
-import * as useClickOutside from "react-click-outside-hook"
 
 import type { User } from "~/types/database"
-import type { SearchResponse } from "~/types/response"
 
 import { Command, CommandInput, CommandList } from "../ui/command"
 import { UserSearchItem } from "./user-search-item"
 import { InView } from "react-intersection-observer"
 
-export function UserSearch() {
-	const actionData = useActionData<SearchResponse>()
+export function UserSearch({
+	data = [],
+	pageLimit = 0
+}: {
+	data?: User[]
+	pageLimit?: number
+}) {
+	const [searchParams, setSearchParams] = useSearchParams()
 	const submit = useSubmit()
-
-	const [data, setData] = useState<{
-		search: string
-		users: User[]
-		page: number
-	}>({
-		search: "",
-		users: [],
-		page: 1
-	})
 
 	const [open, setOpen] = useState(false)
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -35,43 +29,24 @@ export function UserSearch() {
 		[submit]
 	)
 
-	function searchUser(search: string, page = data.page) {
-		if (actionData?.data && page > actionData.data.pagination.totalPages) return
+	function searchUser(search: string, page = 1) {
+		const newParams = new URLSearchParams(searchParams)
+		const currentSearch = newParams.get("search")
 
-		submit(
-			JSON.stringify({
-				type: "SEARCH_USERS",
-				search,
-				page
-			}),
-			{ method: "POST", encType: "application/json" }
-		)
+		if (search !== currentSearch) newParams.set("page", "1")
+		else if (page <= pageLimit) newParams.set("page", page.toString())
 
-		setData(prevData => {
-			const newData = { ...prevData }
-			if (search !== prevData.search) newData.users = []
-			newData.search = search
-			return newData
-		})
+		newParams.set("search", search)
+		setSearchParams(newParams)
 	}
 
 	function onBlur({
 		relatedTarget
 	}: React.FocusEvent<HTMLDivElement, Element>) {
 		if (!relatedTarget || !commandRef.current) return
+		console.log(commandRef.current.contains(relatedTarget))
 		setOpen(commandRef.current.contains(relatedTarget))
 	}
-
-	useEffect(() => {
-		if (actionData?.type !== "SearchResponse") return
-		setData(prevData => {
-			if (!actionData?.data) return prevData
-			const newData = { ...prevData }
-			newData.users = [...newData.users, ...(actionData.data.users || [])]
-			newData.page = actionData.data.pagination.currentPage
-			return newData
-		})
-	}, [actionData])
 
 	return (
 		<Command
@@ -88,13 +63,30 @@ export function UserSearch() {
 			<CommandList className="absolute bottom-0 w-full h-max rounded-md translate-y-full bg-background">
 				{open && (
 					<>
-						{data.users.map(user => (
+						{data.length > 0 && (
+							<InView
+								onChange={inView =>
+									inView
+										? searchUser(
+												inputRef.current?.value || "",
+												Math.max(1, parseInt(searchParams.get("page") || "1") - 1)
+										  )
+										: null
+								}
+							>
+								<div className="w-full"></div>
+							</InView>
+						)}
+						{data.map(user => (
 							<UserSearchItem key={user.id} {...user} />
 						))}
 						<InView
 							onChange={inView =>
 								inView
-									? searchUser(inputRef.current?.value || "", data.page)
+									? searchUser(
+											inputRef.current?.value || "",
+											parseInt(searchParams.get("page") || "0") + 1
+									  )
 									: null
 							}
 						>
