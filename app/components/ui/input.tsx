@@ -14,7 +14,7 @@ const Input = React.forwardRef<
 			)}
 		>
 			{icon && <div className="flex justify-center items-center h-4 w-4 text-muted-foreground">{icon}</div>}
-			<input className="w-full outline-none" type={type} ref={ref} {...props} />
+			<input className="w-full outline-none bg-transparent" type={type} ref={ref} {...props} />
 		</label>
 	)
 })

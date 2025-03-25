@@ -9,7 +9,12 @@ import {
 export default [
 	layout("routes/protected-route.tsx", [
 		index("routes/home.tsx"),
-    route("schedule", "routes/schedule.tsx"),
+		route("schedule", "routes/schedule.tsx"),
+		...prefix("training", [
+			index("routes/training/index.tsx"),
+			route(":trainingId", "routes/training/training.tsx"),
+			route("create", "routes/training/create-training.tsx")
+		]),
 		...prefix("help", [
 			index("routes/help/help.tsx"),
 			route(":ticketId", "routes/help/help-ticket.tsx")
