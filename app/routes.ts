@@ -9,7 +9,7 @@ import {
 export default [
 	layout("routes/protected-route.tsx", [
 		index("routes/home.tsx"),
-		route("schedule", "routes/schedule/index.tsx", [
+		route("schedule", "routes/schedule/schedule.tsx", [
 			route("new", "routes/schedule/new-schedule.tsx"),
       route("details/:hour/:day", "routes/schedule/schedule-details.tsx")
 		]),

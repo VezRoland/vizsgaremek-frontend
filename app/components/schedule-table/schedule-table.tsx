@@ -1,10 +1,9 @@
-import { ChevronLeft, ChevronRight, HandCoins, Plus } from "lucide-react"
-import { Link, useSubmit } from "react-router"
 import { ScheduleContext } from "~/lib/utils"
 
 import { ScheduleCategory } from "~/types/database"
-import type { ScheduleWeek, DetailsUser } from "~/types/results"
+import type { ScheduleWeek } from "~/types/results"
 
+import { Link } from "react-router"
 import { Button } from "../ui/button"
 import { ScheduleTableItem } from "./schedule-table-item"
 import {
@@ -14,11 +13,10 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "../ui/select"
-import { NewScheduleDialog } from "./new-schedule-dialog"
+import { ChevronLeft, ChevronRight, HandCoins, Plus } from "lucide-react"
 
 const DAY = 24 * 60 * 60 * 1000
-
-const days = [
+const DAYS = [
 	"Monday",
 	"Tuesday",
 	"Wednesday",
@@ -28,20 +26,7 @@ const days = [
 	"Sunday"
 ]
 
-export function ScheduleTable({ data }: { data: ScheduleWeek }) {
-  console.log(data)
-	const date = new Date()
-
-	const pastLimit = new Date(date)
-	pastLimit.setFullYear(date.getFullYear() - 1)
-
-	const futureLimit = new Date(date)
-	futureLimit.setFullYear(date.getFullYear() + 1)
-
-	const week = new Date(date.getTime() - date.getDay() * DAY)
-	week.setUTCHours(0, 0, 0, 0)
-	week.setTime(week.getTime() - 14 * DAY)
-
+export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 	return (
 		<ScheduleContext.Provider value={data}>
 			<section className="w-full h-full flex flex-col gap-4">
@@ -50,20 +35,20 @@ export function ScheduleTable({ data }: { data: ScheduleWeek }) {
 						<Link
 							className="grid flex-1 place-content-center"
 							to={`/schedule${
-								data.prevDate ? `?week_start=${data.prevDate}` : ""
+								data?.prevDate ? `?week_start=${data.prevDate}` : ""
 							}`}
 						>
-							<Button size="icon" variant="ghost" disabled={!data.prevDate}>
+							<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
 								<ChevronLeft />
 							</Button>
 						</Link>
 						<Link
 							className="grid flex-1 place-content-center"
 							to={`/schedule${
-								data.nextDate ? `?week_start=${data.nextDate}` : ""
+								data?.nextDate ? `?week_start=${data.nextDate}` : ""
 							}`}
 						>
-							<Button size="icon" variant="ghost" disabled={!data.nextDate}>
+							<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
 								<ChevronRight />
 							</Button>
 						</Link>
@@ -94,18 +79,20 @@ export function ScheduleTable({ data }: { data: ScheduleWeek }) {
 					<table className="relative isolate w-full table-fixed">
 						<thead className="z-10 sticky top-0 border-2 border-accent text-accent-foreground bg-accent">
 							<tr>
-								{days.map((day, i) => (
+								{DAYS.map((day, i) => (
 									<th className="w-32 p-2 border border-accent" key={day}>
 										<span>{day}</span>
 										<br />
-										<span className="font-normal">
-											{new Date(
-												new Date(data.week_start).getTime() + i * DAY
-											).toLocaleDateString(undefined, {
-												month: "2-digit",
-												day: "2-digit"
-											})}
-										</span>
+										{data && (
+											<span className="font-normal">
+												{new Date(
+													new Date(data.week_start).getTime() + i * DAY
+												).toLocaleDateString(undefined, {
+													month: "2-digit",
+													day: "2-digit"
+												})}
+											</span>
+										)}
 									</th>
 								))}
 							</tr>

@@ -1,6 +1,5 @@
 import type { Route } from "./+types/schedule-details"
-import type { ApiResponse } from "~/types/response"
-import type { ScheduleDetails } from "~/types/results"
+import type { ApiResponse, ScheduleDetails } from "~/types/results"
 
 import {
 	Dialog,
@@ -24,8 +23,15 @@ import type { z } from "zod"
 import { scheduleSchema } from "~/schemas/schedule"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { DateTimePicker } from "~/components/ui/datetime-picker"
-import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
 import { UsersTable } from "~/components/schedule-table/users-table"
+import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Edit Schedule" },
+    { name: "description", content: "Edit a specific schedule" }
+  ]
+}
 
 export async function clientLoader({
 	params: { hour, day }
@@ -34,8 +40,6 @@ export async function clientLoader({
 		`http://localhost:3000/schedule/details/${hour}-${day}?week_start=2025-03-23T00:00:00`,
 		{ credentials: "include" }
 	)
-
-  console.log(response)
 
 	return response.json() as Promise<ApiResponse<ScheduleDetails>>
 }
@@ -55,13 +59,12 @@ function getDayName(index: number) {
 
 export default function ScheduleDetails({
 	params,
-	actionData,
 	loaderData
 }: Route.ComponentProps) {
 	const navigate = useNavigate()
 	const user = useUserContext()
 
-  console.log(loaderData.data?.schedules[0])
+	console.log(loaderData.data?.schedules[0])
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),

@@ -1,14 +1,17 @@
-import { redirect, useNavigate, useSubmit } from "react-router"
+import { useEffect } from "react"
+import { useNavigate, useSubmit } from "react-router"
+import { cn, handleServerResponse, useUserContext } from "~/lib/utils"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { z } from "zod"
+import { scheduleSchema } from "~/schemas/schedule"
 
 import type { Route } from "./+types/new-schedule"
-import { ScheduleCategory, UserRole } from "~/types/database"
-import type { ApiResponse, SearchResponse } from "~/types/response"
+import { ScheduleCategory, UserRole, type User } from "~/types/database"
+import type { Pagination } from "~/types/results"
+import type { ApiResponse } from "~/types/results"
 
 import { UserInput } from "~/components/schedule-table/user-input"
-import { UserSearch } from "~/components/schedule-table/user-search"
 import { UserSearchProvider } from "~/components/schedule-table/user-search-provider"
 import { Button } from "~/components/ui/button"
 import { DateTimePicker } from "~/components/ui/datetime-picker"
@@ -34,27 +37,39 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "~/components/ui/select"
-import { cn, handleServerResponse, useUserContext } from "~/lib/utils"
-import { scheduleSchema } from "~/schemas/schedule"
-import { FlagTriangleRightIcon, HandCoins } from "lucide-react"
-import { useEffect } from "react"
+import { UserSearch } from "~/components/schedule-table/user-search"
+import { FlagTriangleRightIcon, HandCoins, Loader2 } from "lucide-react"
 
 type FormData = z.infer<typeof scheduleSchema>
+
+interface Search {
+	users: User[]
+	pagination: Pagination
+}
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "New Schedule" },
+    { name: "description", content: "Create a new schedule" }
+  ]
+}
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data: FormData = await request.json()
 
-	const response = await fetch("http://localhost:3000/schedule?week_start=2025-03-23T00:00:00", {
-		method: "POST",
-		body: JSON.stringify(data),
-		headers: {
-			"Content-Type": "application/json"
-		},
-		credentials: "include"
-	})
-	const result: ApiResponse = await response.json()
+	const response = await fetch(
+		"http://localhost:3000/schedule?week_start=2025-03-23T00:00:00",
+		{
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include"
+		}
+	)
 
-	return result
+	return response.json() as Promise<ApiResponse>
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -66,10 +81,8 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 		)}&page=${searchParams.get("page")}`,
 		{ credentials: "include" }
 	)
-	const result: SearchResponse = await response.json()
-  console.log(result)
 
-	return result
+	return response.json() as Promise<ApiResponse<Search>>
 }
 
 export default function NewSchedule({
@@ -90,10 +103,8 @@ export default function NewSchedule({
 		}
 	})
 
-	function onSubmit(values: FormData) {
-    console.log(values)
-
-		submit(
+	async function onSubmit(values: FormData) {
+		await submit(
 			JSON.stringify({
 				...values,
 				user_id: [...JSON.parse(values.user_id)],
@@ -235,7 +246,6 @@ export default function NewSchedule({
 										<UserInput
 											onValueChange={value => {
 												form.setValue("user_id", value)
-												form.trigger("user_id")
 											}}
 										/>
 									)}
@@ -243,22 +253,27 @@ export default function NewSchedule({
 							</UserSearchProvider>
 						</div>
 						<div className="flex justify-end gap-2 pt-4">
-							<Button type="submit">Add</Button>
-							{/* <Button
+							<Button
+								type="submit"
+								disabled={
+									form.formState.isSubmitting ||
+									Object.keys(form.formState.errors).length > 0
+								}
+							>
+								{form.formState.isSubmitting && (
+									<Loader2 className="animate-spin" />
+								)}
+								Add
+							</Button>
+							<DialogClose>
+								<Button
 									type="button"
-									onClick={() =>
-										navigate("/schedule/new?search=Tim", {
-											state: {
-												values: form.getValues(),
-												errors: form.formState.errors
-											}
-										})
+									variant="outline"
+									disabled={
+										form.formState.isSubmitting ||
+										Object.keys(form.formState.errors).length > 0
 									}
 								>
-									Go somewhere
-								</Button> */}
-							<DialogClose>
-								<Button type="button" variant="outline">
 									Cancel
 								</Button>
 							</DialogClose>

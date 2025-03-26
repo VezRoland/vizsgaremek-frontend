@@ -1,5 +1,5 @@
 import { Link, useSubmit } from "react-router"
-import { cn, useScheduleContext, useUserContext } from "~/lib/utils"
+import { cn, ScheduleContext, useUserContext } from "~/lib/utils"
 
 import {
 	Dialog,
@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { DateTimePicker } from "../ui/datetime-picker"
 import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
+import { useContext } from "react"
 
 export function ScheduleTableItem({
 	row,
@@ -29,10 +30,10 @@ export function ScheduleTableItem({
 	row: number
 	column: number
 }) {
-	const { week_start, schedule } = useScheduleContext()
+	const schedule = useContext(ScheduleContext)
 	const user = useUserContext()
 	const submit = useSubmit()
-	const data = schedule[`${row}-${column}`] || []
+	const data = schedule?.schedule[`${row}-${column}`] || []
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
@@ -67,7 +68,7 @@ export function ScheduleTableItem({
 			{
 				type: "VIEW_DETAILS",
 				field: `${row}-${column}`,
-				weekStart: week_start,
+				weekStart: schedule?.week_start || "",
 				page: 1
 			},
 			{ method: "POST", encType: "application/json" }
