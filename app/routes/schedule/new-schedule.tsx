@@ -44,7 +44,7 @@ type FormData = z.infer<typeof scheduleSchema>
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data: FormData = await request.json()
 
-	const response = await fetch("http://localhost:3000/schedule", {
+	const response = await fetch("http://localhost:3000/schedule?week_start=2025-03-23T00:00:00", {
 		method: "POST",
 		body: JSON.stringify(data),
 		headers: {
@@ -67,6 +67,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 		{ credentials: "include" }
 	)
 	const result: SearchResponse = await response.json()
+  console.log(result)
 
 	return result
 }
@@ -90,14 +91,28 @@ export default function NewSchedule({
 	})
 
 	function onSubmit(values: FormData) {
-		submit(JSON.stringify(values), {
-			method: "POST",
-			encType: "application/json"
-		})
+    console.log(values)
+
+		submit(
+			JSON.stringify({
+				...values,
+				user_id: [...JSON.parse(values.user_id)],
+				category: parseInt(values.category),
+				company_id: user.company_id
+			}),
+			{
+				method: "POST",
+				encType: "application/json"
+			}
+		)
 	}
 
-	useEffect(() =>
-		handleServerResponse(actionData, { callback: () => navigate("/schedule") })
+	useEffect(
+		() =>
+			handleServerResponse(actionData, {
+				callback: () => navigate("/schedule")
+			}),
+		[actionData]
 	)
 
 	return (

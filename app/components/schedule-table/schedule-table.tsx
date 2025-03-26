@@ -28,13 +28,8 @@ const days = [
 	"Sunday"
 ]
 
-export function ScheduleTable({
-	tableData,
-	fieldData
-}: {
-	tableData: ScheduleWeek
-	fieldData?: DetailsUser[]
-}) {
+export function ScheduleTable({ data }: { data: ScheduleWeek }) {
+  console.log(data)
 	const date = new Date()
 
 	const pastLimit = new Date(date)
@@ -48,31 +43,27 @@ export function ScheduleTable({
 	week.setTime(week.getTime() - 14 * DAY)
 
 	return (
-		<ScheduleContext.Provider value={{ tableData, fieldData }}>
+		<ScheduleContext.Provider value={data}>
 			<section className="w-full h-full flex flex-col gap-4">
 				<div className="flex flex-wrap justify-between items-center gap-2">
 					<div className="flex flex-1 justify-between">
 						<Link
 							className="grid flex-1 place-content-center"
-							to={`/schedule${tableData.prevDate ? `?week_start=${tableData.prevDate}` : ""}`}
+							to={`/schedule${
+								data.prevDate ? `?week_start=${data.prevDate}` : ""
+							}`}
 						>
-							<Button
-								size="icon"
-								variant="ghost"
-								disabled={!tableData.prevDate}
-							>
+							<Button size="icon" variant="ghost" disabled={!data.prevDate}>
 								<ChevronLeft />
 							</Button>
 						</Link>
 						<Link
 							className="grid flex-1 place-content-center"
-							to={`/schedule${tableData.nextDate ? `?week_start=${tableData.nextDate}` : ""}`}
+							to={`/schedule${
+								data.nextDate ? `?week_start=${data.nextDate}` : ""
+							}`}
 						>
-							<Button
-								size="icon"
-								variant="ghost"
-								disabled={!tableData.nextDate}
-							>
+							<Button size="icon" variant="ghost" disabled={!data.nextDate}>
 								<ChevronRight />
 							</Button>
 						</Link>
@@ -92,11 +83,11 @@ export function ScheduleTable({
 								</SelectItem>
 							</SelectContent>
 						</Select>
-						<NewScheduleDialog>
-							<Button className="aspect-square" size="icon">
+						<Button className="aspect-square" size="icon" asChild>
+							<Link to="/schedule/new">
 								<Plus />
-							</Button>
-						</NewScheduleDialog>
+							</Link>
+						</Button>
 					</div>
 				</div>
 				<div className="w-full flex-1 border-b rounded-md text-nowrap bg-accent overflow-auto">
@@ -109,7 +100,7 @@ export function ScheduleTable({
 										<br />
 										<span className="font-normal">
 											{new Date(
-												new Date(tableData.week_start).getTime() + i * DAY
+												new Date(data.week_start).getTime() + i * DAY
 											).toLocaleDateString(undefined, {
 												month: "2-digit",
 												day: "2-digit"

@@ -10,7 +10,8 @@ export default [
 	layout("routes/protected-route.tsx", [
 		index("routes/home.tsx"),
 		route("schedule", "routes/schedule/index.tsx", [
-			route("new", "routes/schedule/new-schedule.tsx")
+			route("new", "routes/schedule/new-schedule.tsx"),
+      route("details/:hour/:day", "routes/schedule/schedule-details.tsx")
 		]),
 		...prefix("help", [
 			index("routes/help/help.tsx"),

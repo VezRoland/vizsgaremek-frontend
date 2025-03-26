@@ -13,9 +13,8 @@ import type {
 	SortingState,
 	VisibilityState
 } from "@tanstack/react-table"
-import { useScheduleContext } from "~/lib/utils"
 
-import type { DetailsUser } from "~/types/results"
+import type { DetailsUser, ScheduleDetails } from "~/types/results"
 
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -120,8 +119,13 @@ export const columns: ColumnDef<DetailsUser>[] = [
 	}
 ]
 
-export function UsersTable() {
-	const { fieldData } = useScheduleContext()
+export function UsersTable({
+	data = [],
+	pageLimit = 1
+}: {
+	data: DetailsUser[] | undefined
+	pageLimit: number | undefined
+}) {
 	const [sorting, setSorting] = React.useState<SortingState>([])
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
@@ -131,7 +135,7 @@ export function UsersTable() {
 	const [rowSelection, setRowSelection] = React.useState({})
 
 	const table = useReactTable<DetailsUser>({
-		data: fieldData?.schedules || [],
+		data,
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
@@ -141,7 +145,7 @@ export function UsersTable() {
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
-    pageCount: fieldData?.pagination.totalPages,
+		pageCount: pageLimit,
 		state: {
 			sorting,
 			columnFilters,
