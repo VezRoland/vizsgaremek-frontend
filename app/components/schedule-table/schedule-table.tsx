@@ -32,26 +32,22 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 			<section className="w-full h-full flex flex-col gap-4">
 				<div className="flex flex-wrap justify-between items-center gap-2">
 					<div className="flex flex-1 justify-between">
-						<Link
-							className="grid flex-1 place-content-center"
-							to={`/schedule${
-								data?.prevDate ? `?week_start=${data.prevDate}` : ""
-							}`}
-						>
-							<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
+						<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
+							<Link
+								className="grid flex-1 place-content-center"
+								to={`/schedule?week_start=${data?.prevDate}`}
+							>
 								<ChevronLeft />
-							</Button>
-						</Link>
-						<Link
-							className="grid flex-1 place-content-center"
-							to={`/schedule${
-								data?.nextDate ? `?week_start=${data.nextDate}` : ""
-							}`}
-						>
-							<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
+							</Link>
+						</Button>
+						<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
+							<Link
+								className="grid flex-1 place-content-center"
+								to={`/schedule?week_start=${data?.nextDate}`}
+							>
 								<ChevronRight />
-							</Button>
-						</Link>
+							</Link>
+						</Button>
 					</div>
 					<div className="w-max flex flex-[999] gap-4">
 						<Select defaultValue="all">
