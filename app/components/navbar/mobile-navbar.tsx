@@ -21,6 +21,7 @@ import {
 } from "../ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import ActionLoadingWrapper from "../action-loading-wrapper"
+import Icon from "~/../public/favicon.ico"
 
 export default function MobileNavbar({
 	routes,
@@ -33,7 +34,7 @@ export default function MobileNavbar({
 
 	return (
 		<nav className="sticky top-0 left-0 max-w-full flex justify-between p-4 border-b bg-background/25 backdrop-blur-md">
-			<img className="h-9" src="favicon.ico" alt="" />
+			<img className="h-9" src={Icon} alt="Logo" />
 			<Drawer direction="right">
 				<DrawerTrigger asChild>
 					<Button size="icon" variant="ghost">
@@ -42,7 +43,7 @@ export default function MobileNavbar({
 				</DrawerTrigger>
 				<DrawerContent className="h-full">
 					<DrawerHeader className="flex justify-between">
-						<img className="h-9" src="favicon.ico" alt="" />
+						<img className="h-9" src={Icon} alt="Logo" />
 						<DrawerClose asChild>
 							<Button size="icon" variant="ghost">
 								<X />
@@ -65,7 +66,7 @@ export default function MobileNavbar({
 								</Avatar>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
-								<ActionLoadingWrapper pathname="/" method="DELETE">
+								<ActionLoadingWrapper method="DELETE">
 									<DropdownMenuItem onClick={onSignOut}>
 										Kijelentkezés
 									</DropdownMenuItem>
@@ -73,7 +74,7 @@ export default function MobileNavbar({
 							</DropdownMenuContent>
 						</DropdownMenu>
 						<div>
-							<ActionLoadingWrapper pathname="/" method="DELETE">
+							<ActionLoadingWrapper method="DELETE">
 								<Button size="icon" variant="ghost" onClick={onSignOut}>
 									<LogOut />
 								</Button>
