@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useSubmit } from "react-router"
 import {
 	flexRender,
 	getCoreRowModel,
@@ -7,14 +8,14 @@ import {
 	getSortedRowModel,
 	useReactTable
 } from "@tanstack/react-table"
+
 import type {
 	ColumnDef,
 	ColumnFiltersState,
 	SortingState,
 	VisibilityState
 } from "@tanstack/react-table"
-
-import type { DetailsUser, ScheduleDetails } from "~/types/results"
+import type { DetailsUser } from "~/types/results"
 
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -36,89 +37,6 @@ import {
 } from "~/components/ui/table"
 import { ChevronDown, MoreHorizontal } from "lucide-react"
 
-export const columns: ColumnDef<DetailsUser>[] = [
-	{
-		id: "select",
-		header: ({ table }) => (
-			<div className="w-full h-full grid place-items-center">
-				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
-					}
-					onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-					aria-label="Select all"
-				/>
-			</div>
-		),
-		cell: ({ row }) => (
-			<div className="w-full h-full grid place-items-center">
-				<Checkbox
-					checked={row.getIsSelected()}
-					onCheckedChange={value => row.toggleSelected(!!value)}
-					aria-label="Select row"
-				/>
-			</div>
-		),
-		enableSorting: false,
-		enableHiding: false
-	},
-	{
-		accessorKey: "user",
-		header: "Name",
-		cell: ({ row }) => (
-			<div>
-				{row.original.user.avatar_url}
-				{row.original.user.name}
-			</div>
-		)
-	},
-	{
-		accessorKey: "start",
-		header: () => <div className="text-right">Start</div>,
-		cell: ({ row }) => {
-			const start = new Date(row.getValue("start"))
-
-			return (
-				<div className="text-right font-medium">
-					{start.toLocaleDateString()}
-				</div>
-			)
-		}
-	},
-	{
-		accessorKey: "end",
-		header: () => <div className="text-right">End</div>,
-		cell: ({ row }) => {
-			const end = new Date(row.getValue("end"))
-
-			return (
-				<div className="text-right font-medium">{end.toLocaleDateString()}</div>
-			)
-		}
-	},
-	{
-		id: "actions",
-		enableHiding: false,
-		cell: () => {
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem>Finalize</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			)
-		}
-	}
-]
-
 export function UsersTable({
 	data = [],
 	pageLimit = 1
@@ -126,6 +44,7 @@ export function UsersTable({
 	data: DetailsUser[] | undefined
 	pageLimit: number | undefined
 }) {
+	const submit = useSubmit()
 	const [sorting, setSorting] = React.useState<SortingState>([])
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
@@ -133,6 +52,93 @@ export function UsersTable({
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({})
 	const [rowSelection, setRowSelection] = React.useState({})
+
+	const columns: ColumnDef<DetailsUser>[] = [
+		{
+			id: "select",
+			header: ({ table }) => (
+				<div className="w-full h-full grid place-items-center">
+					<Checkbox
+						checked={
+							table.getIsAllPageRowsSelected() ||
+							(table.getIsSomePageRowsSelected() && "indeterminate")
+						}
+						onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+						aria-label="Select all"
+					/>
+				</div>
+			),
+			cell: ({ row }) => (
+				<div className="w-full h-full grid place-items-center">
+					<Checkbox
+						checked={row.getIsSelected()}
+						onCheckedChange={value => row.toggleSelected(!!value)}
+						aria-label="Select row"
+					/>
+				</div>
+			),
+			enableSorting: false,
+			enableHiding: false
+		},
+		{
+			accessorKey: "user",
+			header: "Name",
+			cell: ({ row }) => (
+				<div>
+					{row.original.user.avatar_url}
+					{row.original.user.name}
+				</div>
+			)
+		},
+		{
+			accessorKey: "start",
+			header: () => <div className="text-right">Start</div>,
+			cell: ({ row }) => {
+				const start = new Date(row.getValue("start"))
+
+				return (
+					<div className="text-right font-medium">
+						{start.toLocaleDateString()}
+					</div>
+				)
+			}
+		},
+		{
+			accessorKey: "end",
+			header: () => <div className="text-right">End</div>,
+			cell: ({ row }) => {
+				const end = new Date(row.getValue("end"))
+
+				return (
+					<div className="text-right font-medium">
+						{end.toLocaleDateString()}
+					</div>
+				)
+			}
+		},
+		{
+			id: "actions",
+			enableHiding: false,
+			cell: ({ row }) => {
+				return (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" className="h-8 w-8 p-0">
+								<span className="sr-only">Open menu</span>
+								<MoreHorizontal />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuLabel>Actions</DropdownMenuLabel>
+							<DropdownMenuItem onClick={() => onFinalize(row.original.id)}>
+								Finalize
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)
+			}
+		}
+	]
 
 	const table = useReactTable<DetailsUser>({
 		data,
@@ -153,6 +159,14 @@ export function UsersTable({
 			rowSelection
 		}
 	})
+
+	function onFinalize(id?: string) {
+		const scheduleIds = id ? [id] : []
+		submit(JSON.stringify({ scheduleIds, finalized: true }), {
+			method: "PATCH",
+			encType: "application/json"
+		})
+	}
 
 	return (
 		<div className="w-full">

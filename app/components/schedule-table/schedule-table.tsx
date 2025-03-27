@@ -82,7 +82,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 										{data && (
 											<span className="font-normal">
 												{new Date(
-													new Date(data.week_start).getTime() + i * DAY
+													new Date(data.week_start).getTime() + (i + 1) * DAY
 												).toLocaleDateString(undefined, {
 													month: "2-digit",
 													day: "2-digit"

@@ -7,9 +7,9 @@ import {
 	DialogHeader,
 	DialogTitle
 } from "~/components/ui/dialog"
-import React from "react"
-import { Await, useNavigate } from "react-router"
-import { useUserContext } from "~/lib/utils"
+import { useEffect } from "react"
+import { useNavigate } from "react-router"
+import { handleServerResponse, useUserContext } from "~/lib/utils"
 import { UserRole } from "~/types/database"
 import {
 	Form,
@@ -27,10 +27,35 @@ import { UsersTable } from "~/components/schedule-table/users-table"
 import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Edit Schedule" },
-    { name: "description", content: "Edit a specific schedule" }
-  ]
+	return [
+		{ title: "Edit Schedule" },
+		{ name: "description", content: "Edit a specific schedule" }
+	]
+}
+
+export async function clientAction({ request }: Route.ClientActionArgs) {
+	let result: Promise<ApiResponse> | null
+
+	switch (request.method) {
+		case "PATCH": {
+			const { scheduleIds, finalized } = await request.json()
+			const response = await fetch("http://localhost:3000/schedule/finalize", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					schedule_ids: scheduleIds,
+					finalized
+				}),
+				credentials: "include"
+			})
+			return (result = response.json())
+		}
+		default: {
+			result = null
+		}
+	}
+
+	return result
 }
 
 export async function clientLoader({
@@ -59,12 +84,11 @@ function getDayName(index: number) {
 
 export default function ScheduleDetails({
 	params,
+	actionData,
 	loaderData
 }: Route.ComponentProps) {
 	const navigate = useNavigate()
 	const user = useUserContext()
-
-	console.log(loaderData.data?.schedules[0])
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
@@ -85,77 +109,70 @@ export default function ScheduleDetails({
 		}
 	})
 
+	const { hour, day } = params
+
+	useEffect(() => handleServerResponse(actionData), [actionData])
+
 	return (
 		<Dialog
 			onOpenChange={open => (!open ? navigate("/schedule") : null)}
 			defaultOpen={true}
 		>
-			<React.Suspense fallback={<div>Loading...</div>}>
-				<Await resolve={loaderData}>
-					{value => {
-						const { hour, day } = params
-						console.log(value.data)
-
-						return (
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>
-										{getDayName(parseInt(day))} -{" "}
-										{`${hour.toString().padStart(2, "0")}:00`}
-									</DialogTitle>
-								</DialogHeader>
-								{user.role === UserRole.Employee ? (
-									<Form {...form}>
-										<form>
-											<FormField
-												control={form.control}
-												name="start"
-												render={({ field }) => (
-													<FormItem className="flex-1">
-														<FormControl>
-															<DateTimePicker
-																className="overflow-clip"
-																icon={<FlagTriangleRightIcon />}
-																granularity="minute"
-																value={field.value}
-																onChange={field.onChange}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>
+						{getDayName(parseInt(day))} -{" "}
+						{`${hour.toString().padStart(2, "0")}:00`}
+					</DialogTitle>
+				</DialogHeader>
+				{user.role === UserRole.Employee ? (
+					<Form {...form}>
+						<form>
+							<FormField
+								control={form.control}
+								name="start"
+								render={({ field }) => (
+									<FormItem className="flex-1">
+										<FormControl>
+											<DateTimePicker
+												className="overflow-clip"
+												icon={<FlagTriangleRightIcon />}
+												granularity="minute"
+												value={field.value}
+												onChange={field.onChange}
 											/>
-											<FormField
-												control={form.control}
-												name="end"
-												render={({ field }) => (
-													<FormItem className="flex-1">
-														<FormControl>
-															<DateTimePicker
-																className="max-w-full text-clip"
-																icon={<FlagTriangleLeftIcon />}
-																granularity="minute"
-																value={field.value}
-																onChange={field.onChange}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</form>
-									</Form>
-								) : (
-									<UsersTable
-										data={value.data?.schedules}
-										pageLimit={value.data?.pagination.totalPages}
-									/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
 								)}
-							</DialogContent>
-						)
-					}}
-				</Await>
-			</React.Suspense>
+							/>
+							<FormField
+								control={form.control}
+								name="end"
+								render={({ field }) => (
+									<FormItem className="flex-1">
+										<FormControl>
+											<DateTimePicker
+												className="max-w-full text-clip"
+												icon={<FlagTriangleLeftIcon />}
+												granularity="minute"
+												value={field.value}
+												onChange={field.onChange}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</form>
+					</Form>
+				) : (
+					<UsersTable
+						data={loaderData.data?.schedules}
+						pageLimit={loaderData.data?.pagination.totalPages}
+					/>
+				)}
+			</DialogContent>
 		</Dialog>
 	)
 }

@@ -6,10 +6,10 @@ import type { ApiResponse, ScheduleWeek } from "~/types/results"
 import { ScheduleTable } from "~/components/schedule-table/schedule-table"
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Schedule" },
-    { name: "description", content: "Manage your company's schedule" }
-  ]
+	return [
+		{ title: "Schedule" },
+		{ name: "description", content: "Manage your company's schedule" }
+	]
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
