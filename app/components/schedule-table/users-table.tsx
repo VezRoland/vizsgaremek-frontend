@@ -21,7 +21,6 @@ import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import {
 	DropdownMenu,
-	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
@@ -35,7 +34,11 @@ import {
 	TableHeader,
 	TableRow
 } from "~/components/ui/table"
-import { ChevronDown, MoreHorizontal } from "lucide-react"
+import {
+	ChevronLeft,
+	ChevronRight,
+	MoreHorizontal
+} from "lucide-react"
 
 export function UsersTable({
 	data = [],
@@ -51,7 +54,6 @@ export function UsersTable({
 	)
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({})
-	const [rowSelection, setRowSelection] = React.useState({})
 
 	const columns: ColumnDef<DetailsUser>[] = [
 		{
@@ -150,18 +152,19 @@ export function UsersTable({
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
-		onRowSelectionChange: setRowSelection,
 		pageCount: pageLimit,
 		state: {
 			sorting,
 			columnFilters,
-			columnVisibility,
-			rowSelection
+			columnVisibility
 		}
 	})
 
-	function onFinalize(id?: string) {
-		const scheduleIds = id ? [id] : []
+	function onFinalize(id: string) {
+		const selectedIds = table
+			.getSelectedRowModel()
+			.rows.map(row => row.original.id)
+		const scheduleIds = selectedIds.length > 0 ? selectedIds : [id]
 		submit(JSON.stringify({ scheduleIds, finalized: true }), {
 			method: "PATCH",
 			encType: "application/json"
@@ -170,32 +173,6 @@ export function UsersTable({
 
 	return (
 		<div className="w-full">
-			<div className="flex items-center py-4">
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="outline" className="ml-auto">
-							Columns <ChevronDown />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						{table
-							.getAllColumns()
-							.filter(column => column.getCanHide())
-							.map(column => {
-								return (
-									<DropdownMenuCheckboxItem
-										key={column.id}
-										className="capitalize"
-										checked={column.getIsVisible()}
-										onCheckedChange={value => column.toggleVisibility(!!value)}
-									>
-										{column.id}
-									</DropdownMenuCheckboxItem>
-								)
-							})}
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>
@@ -246,28 +223,28 @@ export function UsersTable({
 					</TableBody>
 				</Table>
 			</div>
-			<div className="flex items-center justify-end space-x-2 py-4">
-				<div className="flex-1 text-sm text-muted-foreground">
-					{table.getFilteredSelectedRowModel().rows.length} of{" "}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
-				</div>
-				<div className="space-x-2">
+			<div className="flex items-center justify-between py-4">
+				<div className="flex gap-2">
 					<Button
 						variant="outline"
-						size="sm"
+						size="icon"
 						onClick={() => table.previousPage()}
 						disabled={!table.getCanPreviousPage()}
 					>
-						Previous
+						<ChevronLeft />
 					</Button>
 					<Button
 						variant="outline"
-						size="sm"
+						size="icon"
 						onClick={() => table.nextPage()}
 						disabled={!table.getCanNextPage()}
 					>
-						Next
+						<ChevronRight />
 					</Button>
+				</div>
+				<div className="text-sm text-muted-foreground">
+					{table.getFilteredSelectedRowModel().rows.length} of{" "}
+					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
 			</div>
 		</div>
