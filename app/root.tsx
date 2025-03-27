@@ -12,7 +12,7 @@ import {
 import { handleServerResponse } from "./lib/utils"
 
 import type { Route } from "./+types/root"
-import type { ApiResponse } from "./types/response"
+import type { ApiResponse } from "./types/results"
 
 import { Toaster } from "~/components/ui/sonner"
 import { LoadingBar } from "./components/navbar/loading-bar"
