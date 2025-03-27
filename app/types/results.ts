@@ -1,8 +1,10 @@
-import type { User, UserRole } from "./database"
+import type { UserRole } from "./database"
 
-export interface UserSearch {
-  users: User[]
-  pagination: Pagination
+export interface ApiResponse<D = unknown, E = unknown> {
+	status: "success" | "error" | "ignore"
+	message: string
+	data?: D
+	errors?: E
 }
 
 export interface DetailsUser {
@@ -23,8 +25,8 @@ export interface ScheduleDetails {
 
 export interface ScheduleWeek {
 	week_start: string
-	prevDate: number | null
-	nextDate: number | null
+	prevDate: string | null
+	nextDate: string | null
 	schedule: { [key: string]: number }
 }
 

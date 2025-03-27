@@ -5,10 +5,9 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
 
-import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
 import type { FormMethod } from "react-router"
-import type { ScheduleWeek, DetailsUser, ScheduleDetails } from "~/types/results"
+import type { ApiResponse, ScheduleWeek } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -22,8 +21,6 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 	}
 ) => {
 	if (!response) return
-
-  console.log(response)
 
 	if (response.errors) {
 		if (!options?.form) return
@@ -92,21 +89,9 @@ export function useUserContext() {
 	return user
 }
 
-export const ScheduleContext = createContext<
-	{ tableData: ScheduleWeek; fieldData?: ScheduleDetails } | undefined
->(undefined)
-
-export function useScheduleContext() {
-	const schedule = useContext(ScheduleContext)
-
-	if (!schedule) {
-		throw Error(
-			"The schedule can only be accessed inside the ScheduleContextProvider!"
-		)
-	}
-
-	return schedule
-}
+export const ScheduleContext = createContext<ScheduleWeek | undefined>(
+	undefined
+)
 
 export const UserSearchContext = createContext<
 	| {
