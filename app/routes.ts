@@ -20,7 +20,9 @@ export default [
 	]),
 	layout("routes/auth/layout.tsx", [
 		route("signin", "routes/auth/signin.tsx"),
-		route("signup-owner", "routes/auth/signup-owner.tsx"),
-		route("signup-employee", "routes/auth/signup-employee.tsx")
+    layout("routes/auth/signup-layout.tsx", [
+      route("signup-company", "routes/auth/signup-company.tsx"),
+      route("signup-employee", "routes/auth/signup-employee.tsx")
+    ])
 	])
 ] satisfies RouteConfig

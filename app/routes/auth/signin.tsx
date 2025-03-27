@@ -1,14 +1,14 @@
-import { useContext, useEffect } from "react"
-import { useActionData, useNavigate, useSubmit } from "react-router"
+import { useEffect } from "react"
+import { Link, useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signInSchema } from "~/schemas/auth"
-import { handleServerResponse, UserContext } from "~/lib/utils"
+import { handleServerResponse } from "~/lib/utils"
 
 import type { Route } from "./+types/signin"
-import type { ApiResponse } from "~/types/response"
+import type { ApiResponse } from "~/types/results"
 
 import {
 	Card,
@@ -23,7 +23,6 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
-	FormLabel,
 	FormMessage
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
@@ -77,7 +76,6 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function SignIn({ actionData }: Route.ComponentProps) {
-	const navigate = useNavigate()
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof signInSchema>>({
@@ -88,7 +86,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 		}
 	})
 
-	const onSubmit = async (values: z.infer<typeof signInSchema>) => {
+	async function onSubmit(values: z.infer<typeof signInSchema>) {
 		await submit(values, {
 			method: "POST",
 			encType: "application/json"
@@ -101,10 +99,10 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 		<Card className="w-full max-w-xl">
 			<CardHeader>
 				<CardTitle>
-					<h1>Bejelentkezés</h1>
+					<h1>Sign in</h1>
 				</CardTitle>
 				<CardDescription>
-					<p>Jelentkezzen be már meglévő fiókjába.</p>
+					<p>Log into an already existing account.</p>
 				</CardDescription>
 			</CardHeader>
 			<Form {...form}>
@@ -115,12 +113,11 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email cím</FormLabel>
 									<FormControl>
 										<Input
 											icon={<Mail size={16} />}
 											type="email"
-											placeholder="emailcim@domain.com"
+											placeholder="email@domain.com"
 											{...field}
 										/>
 									</FormControl>
@@ -133,7 +130,6 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Jelszó</FormLabel>
 									<FormControl>
 										<Input
 											icon={<KeyRound size={16} />}
@@ -147,7 +143,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							)}
 						/>
 					</CardContent>
-					<CardFooter>
+					<CardFooter className="flex-col gap-2">
 						<Button
 							className="w-full"
 							type="submit"
@@ -156,8 +152,11 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							{form.formState.isSubmitting && (
 								<Loader2 className="animate-spin" />
 							)}
-							Bejelentkezés
+							Sign in
 						</Button>
+						<Link className="underline text-primary" to="/signup-employee">
+							I do not have an account.
+						</Link>
 					</CardFooter>
 				</form>
 			</Form>
