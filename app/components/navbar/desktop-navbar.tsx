@@ -10,7 +10,6 @@ import {
 } from "../ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import ActionLoadingWrapper from "../action-loading-wrapper"
-import Icon from "~/../public/favicon.ico"
 
 export default function DesktopNavbar({
 	routes,
@@ -23,7 +22,7 @@ export default function DesktopNavbar({
 
 	return (
 		<nav className="sticky top-0 left-0 max-w-full grid grid-cols-[1fr_2fr_1fr] px-8 py-4 border-b bg-background/50 backdrop-blur-sm">
-			<img className="h-9" src={Icon} alt="Logo" />
+			<img className="h-9" src="/favicon.ico" alt="Logo" />
 			<ul className="flex justify-center">
 				{routes.map(route => (
 					<li>
@@ -41,7 +40,7 @@ export default function DesktopNavbar({
 					</Avatar>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<ActionLoadingWrapper method="DELETE">
+					<ActionLoadingWrapper type="DELETE">
 						<DropdownMenuItem onClick={onSignOut}>
 							Kijelentkezés
 						</DropdownMenuItem>
