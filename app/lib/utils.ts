@@ -1,10 +1,12 @@
 import { createContext, useContext } from "react"
+import { data } from "react-router"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
 
 import type { User } from "~/types/database"
+import type { FormMethod } from "react-router"
 import type { ApiResponse, ScheduleWeek } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
@@ -45,6 +47,34 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 
 	if (response.status !== "ignore") messageToasts[response.status]()
 	if (response.status !== "error" && options?.callback) options.callback()
+}
+
+export async function fetchData<T>(
+	path: string,
+	options?: {
+		method?: FormMethod
+		headers?: HeadersInit
+		body?: any
+		validate?: boolean
+	}
+): Promise<T | undefined> {
+	const response = await fetch(`http://localhost:3000/${path}`, {
+		method: options?.method || "GET",
+		headers: options?.headers,
+		...(options?.body ? { body: JSON.stringify(options.body) } : {}),
+		credentials: "include"
+	})
+
+	if (
+		(options?.validate && !response.ok) ||
+		!response.headers.get("Content-Type")?.includes("application/json")
+	)
+		throw data(null, { status: response.status })
+
+	const result: ApiResponse<T> = await response.json()
+	handleServerResponse(result)
+
+	return result.data
 }
 
 export const UserContext = createContext<User | undefined>(undefined)
