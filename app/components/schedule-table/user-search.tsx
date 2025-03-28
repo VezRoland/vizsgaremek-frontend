@@ -29,16 +29,21 @@ export function UserSearch({
 		[submit]
 	)
 
-	function searchUser(search: string, page = 1) {
+	function searchUser(name: string, page = 1) {
 		const newParams = new URLSearchParams(searchParams)
-		const currentSearch = newParams.get("search")
+		const currentSearch = newParams.get("name")
 
-		if (search !== currentSearch) newParams.set("page", "1")
-		else if (page <= pageLimit) newParams.set("page", page.toString())
+		if (name !== currentSearch) newParams.delete("page")
+		else if (page <= pageLimit && page > 1)
+			newParams.set("name", page.toString())
 
-		newParams.set("search", search)
+		if (name.trim().length > 0) newParams.set("name", name.trim())
+		else newParams.delete("name")
+
 		setSearchParams(newParams)
 	}
+
+	console.log(data)
 
 	function onBlur({
 		relatedTarget
@@ -69,7 +74,10 @@ export function UserSearch({
 									inView
 										? searchUser(
 												inputRef.current?.value || "",
-												Math.max(1, parseInt(searchParams.get("page") || "1") - 1)
+												Math.max(
+													1,
+													parseInt(searchParams.get("page") || "1") - 1
+												)
 										  )
 										: null
 								}

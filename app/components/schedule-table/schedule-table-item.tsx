@@ -3,7 +3,7 @@ import { cn, ScheduleContext, useUserContext } from "~/lib/utils"
 
 import { UserRole } from "~/types/database"
 
-import { Link } from "react-router"
+import { Link, useSearchParams } from "react-router"
 
 export function ScheduleTableItem({
 	row,
@@ -12,6 +12,7 @@ export function ScheduleTableItem({
 	row: number
 	column: number
 }) {
+  const [searchParams] = useSearchParams()
 	const schedule = useContext(ScheduleContext)
 	const user = useUserContext()
 	const data = schedule?.schedule[`${row}-${column}`] || []
@@ -38,7 +39,7 @@ export function ScheduleTableItem({
 				getToday() === column + 1 && "border-b-background bg-primary/25"
 			)}
 		>
-			<Link to={`/schedule/details/${row}/${column}`}>
+			<Link to={`/schedule/details/${row}/${column}?${searchParams.toString()}`}>
 				<div className="flex flex-col px-4 py-2">
 					<span
 						className={cn(

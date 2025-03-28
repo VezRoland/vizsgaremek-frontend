@@ -3,7 +3,7 @@ import { ScheduleContext } from "~/lib/utils"
 import { ScheduleCategory } from "~/types/database"
 import type { ScheduleWeek } from "~/types/results"
 
-import { Link } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { Button } from "../ui/button"
 import { ScheduleTableItem } from "./schedule-table-item"
 import {
@@ -27,6 +27,8 @@ const DAYS = [
 ]
 
 export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
+  const [searchParams] = useSearchParams()
+
 	return (
 		<ScheduleContext.Provider value={data}>
 			<section className="w-full h-full flex flex-col gap-4">
@@ -35,7 +37,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 						<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
 							<Link
 								className="grid flex-1 place-content-center"
-								to={`/schedule?week_start=${data?.prevDate}`}
+								to={`/schedule?weekStart=${data?.prevDate}`}
 							>
 								<ChevronLeft />
 							</Link>
@@ -43,7 +45,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 						<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
 							<Link
 								className="grid flex-1 place-content-center"
-								to={`/schedule?week_start=${data?.nextDate}`}
+								to={`/schedule?weekStart=${data?.nextDate}`}
 							>
 								<ChevronRight />
 							</Link>
@@ -65,7 +67,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 							</SelectContent>
 						</Select>
 						<Button className="aspect-square" size="icon" asChild>
-							<Link to="/schedule/new">
+							<Link to={`/schedule/new?${searchParams.toString()}`}>
 								<Plus />
 							</Link>
 						</Button>

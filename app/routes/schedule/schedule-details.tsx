@@ -1,5 +1,5 @@
 import type { Route } from "./+types/schedule-details"
-import type { ApiResponse, ScheduleDetails } from "~/types/results"
+import type { ScheduleDetails } from "~/types/results"
 
 import {
 	Dialog,
@@ -7,9 +7,8 @@ import {
 	DialogHeader,
 	DialogTitle
 } from "~/components/ui/dialog"
-import { useEffect } from "react"
-import { useNavigate } from "react-router"
-import { handleServerResponse, useUserContext } from "~/lib/utils"
+import { useNavigate, useSearchParams } from "react-router"
+import { fetchData, useUserContext } from "~/lib/utils"
 import { UserRole } from "~/types/database"
 import {
 	Form,
@@ -34,76 +33,57 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
-	let result: Promise<ApiResponse> | null
-
+	const data = await request.json()
 	switch (request.method) {
-		case "PATCH": {
-			const { scheduleIds, finalized } = await request.json()
-			const response = await fetch("http://localhost:3000/schedule/finalize", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					schedule_ids: scheduleIds,
-					finalized
-				}),
-				credentials: "include"
-			})
-			return (result = response.json())
-		}
-		default: {
-			result = null
-		}
+		case "PATCH":
+			return fetchData("schedule/finalize", { method: "PATCH", body: data })
 	}
-
-	return result
 }
 
 export async function clientLoader({
+	request,
 	params: { hour, day }
 }: Route.ClientLoaderArgs) {
-	const response = await fetch(
-		`http://localhost:3000/schedule/details/${hour}-${day}?week_start=2025-03-23T00:00:00`,
-		{ credentials: "include" }
+	const { searchParams } = new URL(request.url)
+	return fetchData<ScheduleDetails>(
+		`schedule/details/${hour}-${day}?${searchParams.toString()}`
 	)
-
-	return response.json() as Promise<ApiResponse<ScheduleDetails>>
 }
 
 function getDayName(index: number) {
 	const days = [
-		"Sunday",
 		"Monday",
 		"Tuesday",
 		"Wednesday",
 		"Thursday",
 		"Friday",
-		"Saturday"
+		"Saturday",
+    "Sunday"
 	]
 	return days[index]
 }
 
-export default function ScheduleDetails({
-	params,
-	actionData,
-	loaderData
-}: Route.ComponentProps) {
+export default function Details({ params, loaderData }: Route.ComponentProps) {
 	const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 	const user = useUserContext()
+
+  console.log(loaderData)
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
 			category:
 				user.role === UserRole.Employee
-					? loaderData.data?.schedules?.at(0)?.category.toString()
+					? loaderData?.schedules?.at(0)?.category.toString()
 					: "1",
 			start:
 				user.role === UserRole.Employee
-					? new Date(loaderData.data?.schedules?.at(0)?.start || new Date())
+					? new Date(loaderData?.schedules?.at(0)?.start || new Date())
 					: new Date(),
 			end:
 				user.role === UserRole.Employee
-					? new Date(loaderData.data?.schedules?.at(0)?.end || new Date())
+					? new Date(loaderData?.schedules?.at(0)?.end || new Date())
 					: new Date(),
 			user_id: user.id
 		}
@@ -111,11 +91,9 @@ export default function ScheduleDetails({
 
 	const { hour, day } = params
 
-	useEffect(() => handleServerResponse(actionData), [actionData])
-
 	return (
 		<Dialog
-			onOpenChange={open => (!open ? navigate("/schedule") : null)}
+			onOpenChange={open => (!open ? navigate(`/schedule?${searchParams.toString()}`) : null)}
 			defaultOpen={true}
 		>
 			<DialogContent>
@@ -168,8 +146,8 @@ export default function ScheduleDetails({
 					</Form>
 				) : (
 					<UsersTable
-						data={loaderData.data?.schedules}
-						pageLimit={loaderData.data?.pagination.totalPages}
+						data={loaderData?.schedules}
+						pageLimit={loaderData?.pagination.totalPages}
 					/>
 				)}
 			</DialogContent>

@@ -15,11 +15,9 @@ export function meta({}: Route.MetaArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-	const weekStart = searchParams.get("week_start")
-	return fetchData<ScheduleWeek>(
-		weekStart ? `schedule/weekStart/${weekStart}` : "schedule",
-		{ validate: true }
-	)
+	return fetchData<ScheduleWeek>(`schedule?${searchParams.toString()}`, {
+		validate: true
+	})
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {

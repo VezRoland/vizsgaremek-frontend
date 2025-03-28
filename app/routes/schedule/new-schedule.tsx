@@ -66,7 +66,8 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-	return fetchData<Search>(`schedule?${searchParams.toString()}`)
+  console.log(searchParams.toString())
+	return fetchData<Search>(`schedule/users?${searchParams.toString()}`)
 }
 
 export default function NewSchedule({ loaderData }: Route.ComponentProps) {
@@ -78,8 +79,8 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	const form = useForm<FormData>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
-			start: new Date(),
-			end: new Date(),
+			start: new Date(searchParams.get("weekStart") || new Date()),
+			end: new Date(searchParams.get("weekStart") || new Date()),
 			category: "1",
 			user_id: user.role === UserRole.Employee ? JSON.stringify([user.id]) : ""
 		}
@@ -175,7 +176,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 															<UserSearch
 																data={loaderData?.users}
 																pageLimit={
-																	loaderData?.pagination.totalPages
+																	loaderData?.pagination?.totalPages
 																}
 															/>
 														</FormControl>
