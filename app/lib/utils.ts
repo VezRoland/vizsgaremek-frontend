@@ -60,7 +60,9 @@ export async function fetchData<T>(
 ): Promise<T | undefined> {
 	const response = await fetch(`http://localhost:3000/${path}`, {
 		method: options?.method || "GET",
-		headers: options?.headers,
+		...(options?.body
+			? { headers: { "Content-Type": "application/json" } }
+			: {}),
 		...(options?.body ? { body: JSON.stringify(options.body) } : {}),
 		credentials: "include"
 	})

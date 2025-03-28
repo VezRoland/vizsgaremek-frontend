@@ -1,6 +1,11 @@
 import { useEffect } from "react"
-import { useNavigate, useSubmit } from "react-router"
-import { cn, handleServerResponse, useUserContext } from "~/lib/utils"
+import { useNavigate, useSearchParams, useSubmit } from "react-router"
+import {
+	cn,
+	fetchData,
+	handleServerResponse,
+	useUserContext
+} from "~/lib/utils"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { z } from "zod"
@@ -48,49 +53,26 @@ interface Search {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New Schedule" },
-    { name: "description", content: "Create a new schedule" }
-  ]
+	return [
+		{ title: "New Schedule" },
+		{ name: "description", content: "Create a new schedule" }
+	]
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data: FormData = await request.json()
-
-	const response = await fetch(
-		"http://localhost:3000/schedule?week_start=2025-03-23T00:00:00",
-		{
-			method: "POST",
-			body: JSON.stringify(data),
-			headers: {
-				"Content-Type": "application/json"
-			},
-			credentials: "include"
-		}
-	)
-
-	return response.json() as Promise<ApiResponse>
+	return fetchData("schedule", { method: "POST", body: data })
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-
-	const response = await fetch(
-		`http://localhost:3000/schedule/users?name=${searchParams.get(
-			"search"
-		)}&page=${searchParams.get("page")}`,
-		{ credentials: "include" }
-	)
-
-	return response.json() as Promise<ApiResponse<Search>>
+	return fetchData<Search>(`schedule?${searchParams.toString()}`)
 }
 
-export default function NewSchedule({
-	actionData,
-	loaderData
-}: Route.ComponentProps) {
+export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	const submit = useSubmit()
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const user = useUserContext()
 
 	const form = useForm<FormData>({
@@ -118,17 +100,13 @@ export default function NewSchedule({
 		)
 	}
 
-	useEffect(
-		() =>
-			handleServerResponse(actionData, {
-				callback: () => navigate("/schedule")
-			}),
-		[actionData]
-	)
-
 	return (
 		<Dialog
-			onOpenChange={open => (!open ? navigate("/schedule") : null)}
+			onOpenChange={open =>
+				!open
+					? navigate(`/schedule?weekStart=${searchParams.get("weekStart")}`)
+					: null
+			}
 			defaultOpen={true}
 		>
 			<DialogContent>
@@ -195,9 +173,9 @@ export default function NewSchedule({
 													<FormItem className="flex-1 flex-col">
 														<FormControl>
 															<UserSearch
-																data={loaderData.data?.users}
+																data={loaderData?.users}
 																pageLimit={
-																	loaderData.data?.pagination.totalPages
+																	loaderData?.pagination.totalPages
 																}
 															/>
 														</FormControl>
