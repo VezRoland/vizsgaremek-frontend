@@ -24,7 +24,7 @@ export interface ScheduleDetails {
 }
 
 export interface ScheduleWeek {
-	week_start: string
+	weekStart: string
 	prevDate: string | null
 	nextDate: string | null
 	schedule: { [key: string]: number }

@@ -27,32 +27,51 @@ const DAYS = [
 ]
 
 export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
-  const [searchParams] = useSearchParams()
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	function setWeekStart(weekStart: string) {
+		setSearchParams(prevParams => {
+			prevParams.set("weekStart", weekStart)
+			return prevParams
+		})
+	}
+
+	function setCategory(category: string) {
+		setSearchParams(prevParams => {
+			if (category === "all") prevParams.delete("category")
+			else prevParams.set("category", category)
+			return prevParams
+		})
+	}
 
 	return (
 		<ScheduleContext.Provider value={data}>
 			<section className="w-full h-full flex flex-col gap-4">
 				<div className="flex flex-wrap justify-between items-center gap-2">
 					<div className="flex flex-1 justify-between">
-						<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
-							<Link
-								className="grid flex-1 place-content-center"
-								to={`/schedule?weekStart=${data?.prevDate}`}
-							>
-								<ChevronLeft />
-							</Link>
+						<Button
+							size="icon"
+							variant="ghost"
+							disabled={!data?.prevDate}
+							onClick={() => data?.prevDate && setWeekStart(data.prevDate)}
+						>
+							<ChevronLeft />
 						</Button>
-						<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
-							<Link
-								className="grid flex-1 place-content-center"
-								to={`/schedule?weekStart=${data?.nextDate}`}
-							>
-								<ChevronRight />
-							</Link>
+						<Button
+							size="icon"
+							variant="ghost"
+							disabled={!data?.nextDate}
+							onClick={() => data?.nextDate && setWeekStart(data.nextDate)}
+						>
+							<ChevronRight />
 						</Button>
 					</div>
 					<div className="w-max flex flex-[999] gap-4">
-						<Select defaultValue="all">
+						<Select
+							key={new Date().getTime()}
+							defaultValue={searchParams.get("category") || "all"}
+							onValueChange={setCategory}
+						>
 							<SelectTrigger className="max-w-max ml-auto" icon={<HandCoins />}>
 								<SelectValue placeholder="Choose a category" />
 							</SelectTrigger>
@@ -84,7 +103,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 										{data && (
 											<span className="font-normal">
 												{new Date(
-													new Date(data.week_start).getTime() + (i + 1) * DAY
+													new Date(data.weekStart).getTime() + (i + 1) * DAY
 												).toLocaleDateString(undefined, {
 													month: "2-digit",
 													day: "2-digit"

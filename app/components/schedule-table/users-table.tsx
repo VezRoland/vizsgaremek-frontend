@@ -34,11 +34,8 @@ import {
 	TableHeader,
 	TableRow
 } from "~/components/ui/table"
-import {
-	ChevronLeft,
-	ChevronRight,
-	MoreHorizontal
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { ScrollArea } from "../ui/scroll-area"
 
 export function UsersTable({
 	data = [],
@@ -58,9 +55,11 @@ export function UsersTable({
 	const columns: ColumnDef<DetailsUser>[] = [
 		{
 			id: "select",
+			size: 64,
 			header: ({ table }) => (
 				<div className="w-full h-full grid place-items-center">
 					<Checkbox
+						className="border-0 bg-primary-foreground"
 						checked={
 							table.getIsAllPageRowsSelected() ||
 							(table.getIsSomePageRowsSelected() && "indeterminate")
@@ -94,49 +93,44 @@ export function UsersTable({
 		},
 		{
 			accessorKey: "start",
-			header: () => <div className="text-right">Start</div>,
+			header: "Start",
 			cell: ({ row }) => {
 				const start = new Date(row.getValue("start"))
 
-				return (
-					<div className="text-right font-medium">
-						{start.toLocaleDateString()}
-					</div>
-				)
+				return <div className="font-medium">{start.toLocaleDateString()}</div>
 			}
 		},
 		{
 			accessorKey: "end",
-			header: () => <div className="text-right">End</div>,
+			header: "End",
 			cell: ({ row }) => {
 				const end = new Date(row.getValue("end"))
 
-				return (
-					<div className="text-right font-medium">
-						{end.toLocaleDateString()}
-					</div>
-				)
+				return <div className="font-medium">{end.toLocaleDateString()}</div>
 			}
 		},
 		{
 			id: "actions",
 			enableHiding: false,
+			size: 64,
 			cell: ({ row }) => {
 				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="h-8 w-8 p-0">
-								<span className="sr-only">Open menu</span>
-								<MoreHorizontal />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
-							<DropdownMenuItem onClick={() => onFinalize(row.original.id)}>
-								Finalize
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<div className="w-full h-full grid place-items-center">
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" className="h-8 w-8 p-0">
+									<span className="sr-only">Open menu</span>
+									<MoreHorizontal />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuLabel>Actions</DropdownMenuLabel>
+								<DropdownMenuItem onClick={() => onFinalize(row.original.id)}>
+									Finalize
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
 				)
 			}
 		}
@@ -173,55 +167,63 @@ export function UsersTable({
 
 	return (
 		<div className="w-full">
-			<div className="rounded-md border">
-				<Table>
-					<TableHeader>
-						{table.getHeaderGroups().map(headerGroup => (
-							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map(header => {
-									return (
-										<TableHead key={header.id}>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-												  )}
-										</TableHead>
-									)
-								})}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map(row => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
-								>
-									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext()
-											)}
-										</TableCell>
-									))}
+			<div className="rounded-md overflow-clip">
+				<ScrollArea className="h-64">
+					<Table>
+						<TableHeader className="bg-primary">
+							{table.getHeaderGroups().map(headerGroup => (
+								<TableRow key={headerGroup.id}>
+									{headerGroup.headers.map(header => {
+										return (
+											<TableHead
+												className="text-primary-foreground"
+												key={header.id}
+											>
+												{header.isPlaceholder
+													? null
+													: flexRender(
+															header.column.columnDef.header,
+															header.getContext()
+													  )}
+											</TableHead>
+										)
+									})}
 								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center"
-								>
-									No results.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
+							))}
+						</TableHeader>
+						<TableBody>
+							{table.getRowModel().rows?.length ? (
+								table.getRowModel().rows.map(row => (
+									<TableRow
+										key={row.id}
+										data-state={row.getIsSelected() && "selected"}
+									>
+										{row.getVisibleCells().map(cell => (
+											<TableCell
+												style={{ width: cell.column.getSize() }}
+												key={cell.id}
+											>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext()
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+								))
+							) : (
+								<TableRow>
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center"
+									>
+										No results.
+									</TableCell>
+								</TableRow>
+							)}
+						</TableBody>
+					</Table>
+				</ScrollArea>
 			</div>
 			<div className="flex items-center justify-between py-4">
 				<div className="flex gap-2">

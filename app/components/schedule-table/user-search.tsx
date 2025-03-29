@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react"
-import { useSearchParams, useSubmit } from "react-router"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useNavigation, useSearchParams, useSubmit } from "react-router"
 import debounce from "debounce"
 
 import type { User } from "~/types/database"
@@ -7,6 +7,7 @@ import type { User } from "~/types/database"
 import { Command, CommandInput, CommandList } from "../ui/command"
 import { UserSearchItem } from "./user-search-item"
 import { InView } from "react-intersection-observer"
+import { Loader, Loader2, LoaderCircle } from "lucide-react"
 
 export function UserSearch({
 	data = [],
@@ -15,10 +16,13 @@ export function UserSearch({
 	data?: User[]
 	pageLimit?: number
 }) {
-	const [searchParams, setSearchParams] = useSearchParams()
 	const submit = useSubmit()
+	const { state } = useNavigation()
+	const [searchParams, setSearchParams] = useSearchParams()
 
 	const [open, setOpen] = useState(false)
+	const [results, setResults] = useState<Map<string, User>>(new Map())
+
 	const inputRef = useRef<HTMLInputElement>(null)
 	const commandRef = useRef<HTMLDivElement>(null)
 
@@ -29,21 +33,30 @@ export function UserSearch({
 		[submit]
 	)
 
-	function searchUser(name: string, page = 1) {
+	function searchUser(name: string | null, page = 1) {
 		const newParams = new URLSearchParams(searchParams)
 		const currentSearch = newParams.get("name")
 
-		if (name !== currentSearch) newParams.delete("page")
-		else if (page <= pageLimit && page > 1)
-			newParams.set("name", page.toString())
+		if (name !== currentSearch) {
+			setResults(new Map())
+			newParams.delete("page")
+		} else if (page <= pageLimit && page > 1) {
+			newParams.set("page", page.toString())
+		}
 
-		if (name.trim().length > 0) newParams.set("name", name.trim())
-		else newParams.delete("name")
+		if (name && name.trim().length > 0) {
+			setResults(new Map())
+			newParams.set("name", name.trim())
+		} else newParams.delete("name")
 
-		setSearchParams(newParams)
+		if (
+			searchParams.get("name") !== newParams.get("name") ||
+			searchParams.get("page") !== newParams.get("page")
+		)
+			setSearchParams(newParams)
 	}
 
-	console.log(data)
+	console.log(state)
 
 	function onBlur({
 		relatedTarget
@@ -52,6 +65,14 @@ export function UserSearch({
 		console.log(commandRef.current.contains(relatedTarget))
 		setOpen(commandRef.current.contains(relatedTarget))
 	}
+
+	useEffect(() => {
+		setResults(prevResults => {
+			const newResults = new Map(prevResults)
+			data.forEach(d => newResults.set(d.id, d))
+			return newResults
+		})
+	}, [data])
 
 	return (
 		<Command
@@ -68,32 +89,20 @@ export function UserSearch({
 			<CommandList className="absolute bottom-0 w-full h-max rounded-md translate-y-full bg-background">
 				{open && (
 					<>
-						{data.length > 0 && (
-							<InView
-								onChange={inView =>
-									inView
-										? searchUser(
-												inputRef.current?.value || "",
-												Math.max(
-													1,
-													parseInt(searchParams.get("page") || "1") - 1
-												)
-										  )
-										: null
-								}
-							>
-								<div className="w-full"></div>
-							</InView>
-						)}
-						{data.map(user => (
+						{Array.from(results.values()).map(user => (
 							<UserSearchItem key={user.id} {...user} />
 						))}
+						{state === "loading" && (
+							<div className="w-full grid place-items-center py-8">
+								<Loader2 className="animate-spin" />
+							</div>
+						)}
 						<InView
 							onChange={inView =>
 								inView
 									? searchUser(
-											inputRef.current?.value || "",
-											parseInt(searchParams.get("page") || "0") + 1
+											inputRef.current?.value || null,
+											parseInt(searchParams.get("page") || "1") + 1
 									  )
 									: null
 							}

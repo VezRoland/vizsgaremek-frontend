@@ -1,9 +1,7 @@
-import { useEffect } from "react"
 import { useNavigate, useSearchParams, useSubmit } from "react-router"
 import {
 	cn,
 	fetchData,
-	handleServerResponse,
 	useUserContext
 } from "~/lib/utils"
 import { useForm } from "react-hook-form"
@@ -14,7 +12,6 @@ import { scheduleSchema } from "~/schemas/schedule"
 import type { Route } from "./+types/new-schedule"
 import { ScheduleCategory, UserRole, type User } from "~/types/database"
 import type { Pagination } from "~/types/results"
-import type { ApiResponse } from "~/types/results"
 
 import { UserInput } from "~/components/schedule-table/user-input"
 import { UserSearchProvider } from "~/components/schedule-table/user-search-provider"
@@ -54,8 +51,8 @@ interface Search {
 
 export function meta({}: Route.MetaArgs) {
 	return [
-		{ title: "New Schedule" },
-		{ name: "description", content: "Create a new schedule" }
+		{ title: "New Shift" },
+		{ name: "description", content: "Create a new shift." }
 	]
 }
 
@@ -66,7 +63,6 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-  console.log(searchParams.toString())
 	return fetchData<Search>(`schedule/users?${searchParams.toString()}`)
 }
 
@@ -105,16 +101,16 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 		<Dialog
 			onOpenChange={open =>
 				!open
-					? navigate(`/schedule?weekStart=${searchParams.get("weekStart")}`)
+					? navigate(`/schedule?${searchParams.toString()}`)
 					: null
 			}
 			defaultOpen={true}
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Create Schedule</DialogTitle>
+					<DialogTitle>New Shift</DialogTitle>
 					<DialogDescription>
-						Add a new record to the already existing work schedules.
+						Create a new paid work shift, or an unpaid day off.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -248,10 +244,6 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 								<Button
 									type="button"
 									variant="outline"
-									disabled={
-										form.formState.isSubmitting ||
-										Object.keys(form.formState.errors).length > 0
-									}
 								>
 									Cancel
 								</Button>
