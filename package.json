@@ -50,9 +50,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^17.4.4",
     "@react-router/dev": "^7.1.4",
     "@tailwindcss/vite": "^4.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/debounce": "^1.2.4",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
     "@types/react-click-outside-hook": "^1.0.3",
