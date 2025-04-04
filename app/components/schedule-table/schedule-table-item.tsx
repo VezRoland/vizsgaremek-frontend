@@ -1,5 +1,5 @@
-import { useSubmit } from "react-router"
-import { cn, useScheduleContext, useUserContext } from "~/lib/utils"
+import { Link, useSubmit } from "react-router"
+import { cn, ScheduleContext, useUserContext } from "~/lib/utils"
 
 import {
 	Dialog,
@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { DateTimePicker } from "../ui/datetime-picker"
 import { FlagTriangleLeftIcon, FlagTriangleRightIcon } from "lucide-react"
+import { useContext } from "react"
 
 export function ScheduleTableItem({
 	row,
@@ -29,18 +30,18 @@ export function ScheduleTableItem({
 	row: number
 	column: number
 }) {
-	const { tableData, fieldData } = useScheduleContext()
-	const userContext = useUserContext()
+	const schedule = useContext(ScheduleContext)
+	const user = useUserContext()
 	const submit = useSubmit()
-	const data = tableData.schedule[`${row}-${column}`] || []
+	const data = schedule?.schedule[`${row}-${column}`] || []
 
 	const form = useForm<z.infer<typeof scheduleSchema>>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
-			category: String(fieldData?.at(0)?.category || 1),
-			start: new Date(fieldData?.at(0)?.start || new Date()),
-			end: new Date(fieldData?.at(0)?.end || new Date()),
-			user_id: userContext.id
+			category: "1",
+			start: new Date(),
+			end: new Date(),
+			user_id: user.id
 		}
 	})
 
@@ -67,7 +68,7 @@ export function ScheduleTableItem({
 			{
 				type: "VIEW_DETAILS",
 				field: `${row}-${column}`,
-				weekStart: tableData.week_start,
+				weekStart: schedule?.week_start || "",
 				page: 1
 			},
 			{ method: "POST", encType: "application/json" }
@@ -80,18 +81,18 @@ export function ScheduleTableItem({
 	}
 
 	function onSubmit(values: z.infer<typeof scheduleSchema>) {
-		submit(
-			JSON.stringify({
-				type: "EDIT_SCHEDULE",
-				id: fieldData![0].id,
-				start: values.start,
-				end: values.end
-			}),
-			{
-				method: "POST",
-				encType: "application/json"
-			}
-		)
+		// submit(
+		// 	JSON.stringify({
+		// 		type: "EDIT_SCHEDULE",
+		// 		id: schedule![0].,
+		// 		start: values.start,
+		// 		end: values.end
+		// 	}),
+		// 	{
+		// 		method: "POST",
+		// 		encType: "application/json"
+		// 	}
+		// )
 	}
 
 	if (typeof data !== "number" || data === 0)
@@ -105,93 +106,117 @@ export function ScheduleTableItem({
 		)
 
 	return (
-		<Dialog onOpenChange={onOpenChange}>
-			<DialogTrigger asChild>
-				<td
-					className={cn(
-						"relative h-16 border group-last:border-b-0",
-						getToday() === column + 1 && "border-b-background bg-primary/25"
-					)}
-				>
-					<div className="flex flex-col px-4 py-2">
-						<span
-							className={cn(
-								"text-sm text-muted-foreground",
-								userContext.role < UserRole.Leader && "text-foreground"
-							)}
-						>
-							{(row).toString().padStart(2, "0")}:00
-						</span>
-						{userContext.role > UserRole.Employee && (
-							<span className="text-lg font-medium">
-								{data} {data > 1 ? "employees" : "employee"}
-							</span>
+		<td
+			className={cn(
+				"relative h-16 border group-last:border-b-0",
+				getToday() === column + 1 && "border-b-background bg-primary/25"
+			)}
+		>
+			<Link to={`/schedule/details/${row}/${column}`}>
+				<div className="flex flex-col px-4 py-2">
+					<span
+						className={cn(
+							"text-sm text-muted-foreground",
+							user.role === UserRole.Employee && "text-foreground"
 						)}
-					</div>
-				</td>
-			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						{getDayName()} - {`${(row).toString().padStart(2, "0")}:00`}
-					</DialogTitle>
-				</DialogHeader>
-				{userContext.role > UserRole.Employee ? (
-					<UsersTable />
-				) : (
-					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)}>
-							<FormField
-								control={form.control}
-								name="start"
-								render={({ field }) => (
-									<FormItem className="flex-1">
-										<FormControl>
-											<DateTimePicker
-												className="overflow-clip"
-												icon={<FlagTriangleRightIcon />}
-												granularity="minute"
-												value={field.value}
-												onChange={field.onChange}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="end"
-								render={({ field }) => (
-									<FormItem className="flex-1">
-										<FormControl>
-											<DateTimePicker
-												className="max-w-full text-clip"
-												icon={<FlagTriangleLeftIcon />}
-												granularity="minute"
-												value={field.value}
-												onChange={field.onChange}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</form>
-					</Form>
-				)}
-				<DialogFooter className="gap-2">
-					{hasPermission(userContext, "schedules", "finalize") && (
-						<Button type="submit">Finalize</Button>
+					>
+						{row.toString().padStart(2, "0")}:00
+					</span>
+					{user.role > UserRole.Employee && (
+						<span className="text-lg font-medium">
+							{data} {data > 1 ? "employees" : "employee"}
+						</span>
 					)}
-					{userContext.role < UserRole.Leader && (
-						<Button type="submit">Edit</Button>
-					)}
-					<DialogClose className="!m-0" asChild>
-						<Button variant="secondary">Cancel</Button>
-					</DialogClose>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</div>
+			</Link>
+		</td>
+		// <Dialog onOpenChange={onOpenChange}>
+		// 	<DialogTrigger asChild>
+		// 		<td
+		// 			className={cn(
+		// 				"relative h-16 border group-last:border-b-0",
+		// 				getToday() === column + 1 && "border-b-background bg-primary/25"
+		// 			)}
+		// 		>
+		// 			<div className="flex flex-col px-4 py-2">
+		// 				<span
+		// 					className={cn(
+		// 						"text-sm text-muted-foreground",
+		// 						user.role === UserRole.Employee && "text-foreground"
+		// 					)}
+		// 				>
+		// 					{(row).toString().padStart(2, "0")}:00
+		// 				</span>
+		// 				{user.role > UserRole.Employee && (
+		// 					<span className="text-lg font-medium">
+		// 						{data} {data > 1 ? "employees" : "employee"}
+		// 					</span>
+		// 				)}
+		// 			</div>
+		// 		</td>
+		// 	</DialogTrigger>
+		// 	<DialogContent>
+		// 		<DialogHeader>
+		// 			<DialogTitle>
+		// 				{getDayName()} - {`${(row).toString().padStart(2, "0")}:00`}
+		// 			</DialogTitle>
+		// 		</DialogHeader>
+		// 		{user.role > UserRole.Employee ? (
+		// 			<UsersTable />
+		// 		) : (
+		// 			<Form {...form}>
+		// 				<form onSubmit={form.handleSubmit(onSubmit)}>
+		// 					<FormField
+		// 						control={form.control}
+		// 						name="start"
+		// 						render={({ field }) => (
+		// 							<FormItem className="flex-1">
+		// 								<FormControl>
+		// 									<DateTimePicker
+		// 										className="overflow-clip"
+		// 										icon={<FlagTriangleRightIcon />}
+		// 										granularity="minute"
+		// 										value={field.value}
+		// 										onChange={field.onChange}
+		// 									/>
+		// 								</FormControl>
+		// 								<FormMessage />
+		// 							</FormItem>
+		// 						)}
+		// 					/>
+		// 					<FormField
+		// 						control={form.control}
+		// 						name="end"
+		// 						render={({ field }) => (
+		// 							<FormItem className="flex-1">
+		// 								<FormControl>
+		// 									<DateTimePicker
+		// 										className="max-w-full text-clip"
+		// 										icon={<FlagTriangleLeftIcon />}
+		// 										granularity="minute"
+		// 										value={field.value}
+		// 										onChange={field.onChange}
+		// 									/>
+		// 								</FormControl>
+		// 								<FormMessage />
+		// 							</FormItem>
+		// 						)}
+		// 					/>
+		// 				</form>
+		// 			</Form>
+		// 		)}
+		// 		<DialogFooter className="gap-2">
+		// 			{hasPermission(user, "schedules", "finalize") && (
+		// 				<Button type="submit">Finalize</Button>
+		// 			)}
+		// 			{user.role === UserRole.Employee && (
+		// 				<Button type="submit">Edit</Button>
+		// 			)}
+		// 			<DialogClose className="!m-0" asChild>
+		// 				<Button variant="secondary">Cancel</Button>
+		// 			</DialogClose>
+		// 		</DialogFooter>
+		// 	</DialogContent>
+		// </Dialog>
 	)
 }

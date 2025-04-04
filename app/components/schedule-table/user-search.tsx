@@ -1,50 +1,50 @@
-import {
-	useCallback,
-	useRef,
-	useState,
-	type ChangeEvent,
-	type FocusEventHandler,
-	type MouseEventHandler
-} from "react"
-import { useActionData, useSubmit } from "react-router"
+import { useCallback, useRef, useState } from "react"
+import { useSearchParams, useSubmit } from "react-router"
 import debounce from "debounce"
-import * as useClickOutside from "react-click-outside-hook"
 
-import type { SearchResponse } from "~/types/response"
+import type { User } from "~/types/database"
 
 import { Command, CommandInput, CommandList } from "../ui/command"
 import { UserSearchItem } from "./user-search-item"
+import { InView } from "react-intersection-observer"
 
-export function UserSearch() {
-	const actionData: SearchResponse | undefined = useActionData()
+export function UserSearch({
+	data = [],
+	pageLimit = 0
+}: {
+	data?: User[]
+	pageLimit?: number
+}) {
+	const [searchParams, setSearchParams] = useSearchParams()
 	const submit = useSubmit()
 
 	const [open, setOpen] = useState(false)
+	const inputRef = useRef<HTMLInputElement>(null)
 	const commandRef = useRef<HTMLDivElement>(null)
 
 	const debouncedSearch = useCallback(
 		debounce((search: string) => {
-			submit(
-				JSON.stringify({
-					type: "SEARCH_USERS",
-					search,
-					page: actionData?.page || 1
-				}),
-				{ method: "POST", encType: "application/json" }
-			)
+			searchUser(search)
 		}, 500),
-		[submit, actionData?.page]
+		[submit]
 	)
 
-	function onSearch(search: string) {
-		debouncedSearch(search)
+	function searchUser(search: string, page = 1) {
+		const newParams = new URLSearchParams(searchParams)
+		const currentSearch = newParams.get("search")
+
+		if (search !== currentSearch) newParams.set("page", "1")
+		else if (page <= pageLimit) newParams.set("page", page.toString())
+
+		newParams.set("search", search)
+		setSearchParams(newParams)
 	}
 
 	function onBlur({
 		relatedTarget
 	}: React.FocusEvent<HTMLDivElement, Element>) {
 		if (!relatedTarget || !commandRef.current) return
-
+		console.log(commandRef.current.contains(relatedTarget))
 		setOpen(commandRef.current.contains(relatedTarget))
 	}
 
@@ -56,15 +56,44 @@ export function UserSearch() {
 		>
 			<CommandInput
 				placeholder="Search for employees"
-				onValueChange={onSearch}
+				onValueChange={search => debouncedSearch(search)}
+				ref={inputRef}
 				onFocus={() => setOpen(true)}
 			/>
-			<CommandList className="absolute bottom-0 w-full h-max translate-y-full bg-background">
-				{open &&
-					actionData?.type === "SearchResponse" &&
-					actionData.data?.map(user => (
-						<UserSearchItem key={user.id} {...user} />
-					))}
+			<CommandList className="absolute bottom-0 w-full h-max rounded-md translate-y-full bg-background">
+				{open && (
+					<>
+						{data.length > 0 && (
+							<InView
+								onChange={inView =>
+									inView
+										? searchUser(
+												inputRef.current?.value || "",
+												Math.max(1, parseInt(searchParams.get("page") || "1") - 1)
+										  )
+										: null
+								}
+							>
+								<div className="w-full"></div>
+							</InView>
+						)}
+						{data.map(user => (
+							<UserSearchItem key={user.id} {...user} />
+						))}
+						<InView
+							onChange={inView =>
+								inView
+									? searchUser(
+											inputRef.current?.value || "",
+											parseInt(searchParams.get("page") || "0") + 1
+									  )
+									: null
+							}
+						>
+							<div className="w-full"></div>
+						</InView>
+					</>
+				)}
 			</CommandList>
 		</Command>
 	)

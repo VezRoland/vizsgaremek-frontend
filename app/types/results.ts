@@ -1,5 +1,12 @@
 import type { UserRole } from "./database"
 
+export interface ApiResponse<D = unknown, E = unknown> {
+	status: "success" | "error" | "ignore"
+	message: string
+	data?: D
+	errors?: E
+}
+
 export interface DetailsUser {
 	id: string
 	category: UserRole
@@ -11,11 +18,23 @@ export interface DetailsUser {
 	}
 }
 
+export interface ScheduleDetails {
+  schedules: DetailsUser[],
+  pagination: Pagination
+}
+
 export interface ScheduleWeek {
 	week_start: string
-	prevDate: number | null
-	nextDate: number | null
+	prevDate: string | null
+	nextDate: string | null
 	schedule: { [key: string]: number }
+}
+
+export interface Pagination {
+	totalPages: number
+	currentPage: number
+	limit: number
+	totalItems: number
 }
 
 export interface InactiveTraining {

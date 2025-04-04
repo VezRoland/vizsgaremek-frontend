@@ -1,11 +1,5 @@
-"use client"
-
 import * as React from "react"
 import {
-	type ColumnDef,
-	type ColumnFiltersState,
-	type SortingState,
-	type VisibilityState,
 	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -13,7 +7,14 @@ import {
 	getSortedRowModel,
 	useReactTable
 } from "@tanstack/react-table"
-import { ChevronDown, MoreHorizontal } from "lucide-react"
+import type {
+	ColumnDef,
+	ColumnFiltersState,
+	SortingState,
+	VisibilityState
+} from "@tanstack/react-table"
+
+import type { DetailsUser, ScheduleDetails } from "~/types/results"
 
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -33,8 +34,7 @@ import {
 	TableHeader,
 	TableRow
 } from "~/components/ui/table"
-import type { DetailsUser } from "~/types/results"
-import { useScheduleContext } from "~/lib/utils"
+import { ChevronDown, MoreHorizontal } from "lucide-react"
 
 export const columns: ColumnDef<DetailsUser>[] = [
 	{
@@ -119,8 +119,13 @@ export const columns: ColumnDef<DetailsUser>[] = [
 	}
 ]
 
-export function UsersTable() {
-	const { fieldData } = useScheduleContext()
+export function UsersTable({
+	data = [],
+	pageLimit = 1
+}: {
+	data: DetailsUser[] | undefined
+	pageLimit: number | undefined
+}) {
 	const [sorting, setSorting] = React.useState<SortingState>([])
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
@@ -128,10 +133,9 @@ export function UsersTable() {
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({})
 	const [rowSelection, setRowSelection] = React.useState({})
-  const [page, setPage] = React.useState(1)
 
 	const table = useReactTable<DetailsUser>({
-		data: fieldData || [],
+		data,
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
@@ -141,6 +145,7 @@ export function UsersTable() {
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
+		pageCount: pageLimit,
 		state: {
 			sorting,
 			columnFilters,
