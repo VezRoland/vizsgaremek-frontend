@@ -61,7 +61,7 @@ export async function fetchData<T>(
 	const response = await fetch(`http://localhost:3000/${path}`, {
 		method: options?.method || "GET",
 		headers: options?.headers,
-		...(options?.body ? { body: JSON.stringify(options.body) } : {}),
+		...(options?.body ? { body: options.body } : {}),
 		credentials: "include"
 	})
 

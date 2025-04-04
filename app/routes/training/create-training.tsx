@@ -1,8 +1,11 @@
+import { useSubmit } from "react-router"
 import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { trainingSchema } from "~/schemas/training"
-import { cn } from "~/lib/utils"
+import { cn, fetchData } from "~/lib/utils"
+
+import type { Route } from "./+types/create-training"
 
 import {
 	Form,
@@ -15,7 +18,7 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Card, CardFooter } from "~/components/ui/card"
-import { LoaderCircle, Plus, Text, Type } from "lucide-react"
+import { LoaderCircle, Paperclip, Plus, Text, Type } from "lucide-react"
 import { UserRole } from "~/types/database"
 import {
 	Select,
@@ -24,11 +27,16 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "~/components/ui/select"
-import type { Route } from "./+types/create-training"
-import { useSubmit } from "react-router"
+import { useEffect, type ChangeEvent } from "react"
+import { FileUpload } from "~/components/training/file-upload"
 
-export function clientAction({ request }: Route.ClientActionArgs) {
-  
+export async function clientAction({ request }: Route.ClientActionArgs) {
+	const formData = await request.formData()
+	fetchData("training", {
+		method: "POST",
+		headers: { "Content-Type": "multipart/form-data" },
+		body: formData
+	})
 }
 
 export default function CreateTraining() {
@@ -38,7 +46,8 @@ export default function CreateTraining() {
 		defaultValues: {
 			name: "",
 			description: "",
-			role: UserRole.Employee
+			role: UserRole.Employee,
+			file: undefined
 		}
 	})
 
@@ -73,11 +82,20 @@ export default function CreateTraining() {
 	}
 
 	async function onSubmit(values: z.infer<typeof trainingSchema>) {
-		await submit(JSON.stringify(values), {
+		const { file, ...data } = values
+		const formData = new FormData()
+		formData.append("file", file)
+		formData.append("data", JSON.stringify(data))
+
+		await submit(formData, {
 			method: "POST",
-			encType: "application/json"
+			encType: "multipart/form-data"
 		})
 	}
+
+	useEffect(() => {
+		console.log(form.getValues())
+	}, [form.getValues()])
 
 	return (
 		<main className="w-full max-w-4xl min-h-[calc(100vh-69px)] grid gap-8 px-4 py-8 m-auto">
@@ -145,6 +163,32 @@ export default function CreateTraining() {
 												)}
 											</SelectContent>
 										</Select>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="file"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<FileUpload
+											accept="application/pdf"
+											onValueChange={file => field.onChange(file)}
+										/>
+										{/* <Input
+											icon={<Paperclip />}
+											type="file"
+											accept="application/pdf, application/vnd.ms-excel"
+											multiple={false}
+											placeholder="Attachement"
+											disabled={form.formState.isSubmitting}
+											onChange={event =>
+												field.onChange(handleFileUpload(event))
+											}
+										/> */}
 									</FormControl>
 									<FormMessage />
 								</FormItem>

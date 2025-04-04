@@ -28,6 +28,7 @@ const trainings: TrainingPreview[] = [
 
 const submissions: TrainingSubmission[] = [
 	{
+    id: "a",
 		name: "Test User",
 		training: "Test training",
 		score: "10/15",
@@ -35,7 +36,7 @@ const submissions: TrainingSubmission[] = [
 	}
 ]
 
-export default function Index() {
+export default function TrainingOverview() {
 	const user = useUserContext()
 
 	return (
