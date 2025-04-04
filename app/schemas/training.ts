@@ -1,4 +1,4 @@
-import { array, object, string, instanceof as instanceof_, boolean } from "zod"
+import { array, object, string, instanceof as instanceof_, boolean, number } from "zod"
 
 const trainingAnswerSchema = object({
 	text: string().min(1, "The answer is required"),
@@ -18,6 +18,7 @@ const trainingQuestionSchema = object({
 export const trainingSchema = object({
 	name: string().min(1, "The test should have a title"),
 	description: string().min(1, "The test should have a description"),
+  role: number(),
 	questions: array(trainingQuestionSchema).min(
 		1,
 		"The test should contain at least 1 question"

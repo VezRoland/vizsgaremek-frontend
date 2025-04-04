@@ -16,13 +16,29 @@ import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Card, CardFooter } from "~/components/ui/card"
 import { LoaderCircle, Plus, Text, Type } from "lucide-react"
+import { UserRole } from "~/types/database"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from "~/components/ui/select"
+import type { Route } from "./+types/create-training"
+import { useSubmit } from "react-router"
+
+export function clientAction({ request }: Route.ClientActionArgs) {
+  
+}
 
 export default function CreateTraining() {
+	const submit = useSubmit()
 	const form = useForm<z.infer<typeof trainingSchema>>({
 		resolver: zodResolver(trainingSchema),
 		defaultValues: {
 			name: "",
-			description: ""
+			description: "",
+			role: UserRole.Employee
 		}
 	})
 
@@ -57,13 +73,10 @@ export default function CreateTraining() {
 	}
 
 	async function onSubmit(values: z.infer<typeof trainingSchema>) {
-		const awaitedValues = await new Promise(resolve => {
-			setTimeout(() => {
-				resolve(values)
-			}, 3000)
+		await submit(JSON.stringify(values), {
+			method: "POST",
+			encType: "application/json"
 		})
-
-    console.log(awaitedValues)
 	}
 
 	return (
@@ -103,6 +116,35 @@ export default function CreateTraining() {
 											disabled={form.formState.isSubmitting}
 											{...field}
 										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="role"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Select
+											defaultValue={field.value.toString()}
+											onValueChange={value => field.onChange(parseInt(value))}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{Object.entries(UserRole).map(
+													([key, value]) =>
+														isNaN(parseInt(key)) && (
+															<SelectItem key={value} value={value.toString()}>
+																{key}
+															</SelectItem>
+														)
+												)}
+											</SelectContent>
+										</Select>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
