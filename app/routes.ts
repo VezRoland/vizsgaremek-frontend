@@ -15,6 +15,8 @@ export default [
 		]),
     ...prefix("training", [
       index("routes/training/overview.tsx"),
+      route("test/:testId", "routes/training/training.tsx"),
+      route("results/:testId", "routes/training/results.tsx"),
       route("create", "routes/training/create-training.tsx")
     ]),
 		...prefix("help", [

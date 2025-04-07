@@ -1,4 +1,4 @@
-import { useSubmit } from "react-router"
+import { redirect, useNavigate, useSubmit } from "react-router"
 import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -18,7 +18,14 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Card, CardFooter } from "~/components/ui/card"
-import { LoaderCircle, Paperclip, Plus, Text, Type } from "lucide-react"
+import {
+	LoaderCircle,
+	Paperclip,
+	Plus,
+	Text,
+	Type,
+	UserRound
+} from "lucide-react"
 import { UserRole } from "~/types/database"
 import {
 	Select,
@@ -32,14 +39,14 @@ import { FileUpload } from "~/components/training/file-upload"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const formData = await request.formData()
-	fetchData("training", {
+	return fetchData("training", {
 		method: "POST",
-		headers: { "Content-Type": "multipart/form-data" },
 		body: formData
 	})
 }
 
-export default function CreateTraining() {
+export default function CreateTraining({ actionData }: Route.ComponentProps) {
+	const navigate = useNavigate()
 	const submit = useSubmit()
 	const form = useForm<z.infer<typeof trainingSchema>>({
 		resolver: zodResolver(trainingSchema),
@@ -94,8 +101,9 @@ export default function CreateTraining() {
 	}
 
 	useEffect(() => {
-		console.log(form.getValues())
-	}, [form.getValues()])
+		if (actionData?.status !== "success") return
+		navigate("/training")
+	}, [actionData])
 
 	return (
 		<main className="w-full max-w-4xl min-h-[calc(100vh-69px)] grid gap-8 px-4 py-8 m-auto">
@@ -149,7 +157,7 @@ export default function CreateTraining() {
 											defaultValue={field.value.toString()}
 											onValueChange={value => field.onChange(parseInt(value))}
 										>
-											<SelectTrigger>
+											<SelectTrigger icon={<UserRound />}>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>

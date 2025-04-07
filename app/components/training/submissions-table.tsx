@@ -17,23 +17,24 @@ export function SubmissionsTable({
 }) {
 	return (
 		<Table>
-			<TableCaption>A list of recent training submissions.</TableCaption>
 			<TableHeader>
 				<TableRow>
 					<TableHead>Name</TableHead>
-					<TableHead>Training</TableHead>
+					<TableHead>Test</TableHead>
 					<TableHead>Score</TableHead>
 					<TableHead>Submitted at</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
 				{submissions.map(submission => (
-					<TableRow>
-						<TableCell>{submission.name}</TableCell>
-						<TableCell>{submission.training}</TableCell>
-						<TableCell>{submission.score}</TableCell>
+					<TableRow key={submission.id}>
+						<TableCell>{submission.userName}</TableCell>
+						<TableCell>{submission.trainingName}</TableCell>
 						<TableCell>
-							{new Date(submission.submittedAt).toLocaleDateString()}
+							{submission.correctCount} / {submission.totalQuestions}
+						</TableCell>
+						<TableCell>
+							{new Date(submission.createdAt).toLocaleString()}
 						</TableCell>
 					</TableRow>
 				))}

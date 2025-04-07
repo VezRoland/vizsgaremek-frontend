@@ -5,6 +5,7 @@ export interface ApiResponse<D = unknown, E = unknown> {
 	message: string
 	data?: D
 	errors?: E
+  redirect?: string
 }
 
 export interface DetailsUser {
@@ -41,7 +42,7 @@ export interface InactiveTraining {
   id: string,
   name: string,
   description: string,
-  file_url: string,
+  fileUrl: string,
   isActive: false,
   created_at: string
 }
@@ -61,15 +62,19 @@ export interface TrainingPreview {
   id: string,
   name: string,
   description: string,
+  active: boolean,
+  completed: boolean,
   createdAt: string
 }
 
 export interface TrainingSubmission {
   id: string,
-	name: string
-	training: string
-	score: string
-	submittedAt: string
+	userName: string
+	trainingName: string
+  totalQuestions: number
+  incorrectCount: number
+	correctCount: number
+	createdAt: string
 }
 
 export interface TrainingQuestion {

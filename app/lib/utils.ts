@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react"
-import { data } from "react-router"
+import { data, useNavigate } from "react-router"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -57,7 +57,7 @@ export async function fetchData<T>(
 		body?: any
 		validate?: boolean
 	}
-): Promise<T | undefined> {
+): Promise<ApiResponse<T> | undefined> {
 	const response = await fetch(`http://localhost:3000/${path}`, {
 		method: options?.method || "GET",
 		headers: options?.headers,
@@ -74,7 +74,7 @@ export async function fetchData<T>(
 	const result: ApiResponse<T> = await response.json()
 	handleServerResponse(result)
 
-	return result.data
+	return result
 }
 
 export const UserContext = createContext<User | undefined>(undefined)

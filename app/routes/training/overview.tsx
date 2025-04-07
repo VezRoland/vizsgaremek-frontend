@@ -1,11 +1,7 @@
-import { useUserContext } from "~/lib/utils"
+import { fetchData, useUserContext } from "~/lib/utils"
 
 import { UserRole } from "~/types/database"
-import type {
-	Training,
-	TrainingPreview,
-	TrainingSubmission
-} from "~/types/results"
+import type { TrainingPreview, TrainingSubmission } from "~/types/results"
 
 import {
 	Card,
@@ -14,21 +10,22 @@ import {
 	CardTitle
 } from "~/components/ui/card"
 import { SubmissionsTable } from "~/components/training/submissions-table"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
+import type { Route } from "./+types/overview"
+import { Button } from "~/components/ui/button"
+import { EllipsisVertical, Plus } from "lucide-react"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger
+} from "~/components/ui/dropdown-menu"
 
 // Mock data
-const trainings: TrainingPreview[] = [
-	{
-		id: crypto.randomUUID(),
-		name: "Software Development Fundamentals",
-		description: "A basic test covering core concepts of software development.",
-		createdAt: new Date().toLocaleDateString()
-	}
-]
 
 const submissions: TrainingSubmission[] = [
 	{
-    id: "a",
+		id: "a",
 		name: "Test User",
 		training: "Test training",
 		score: "10/15",
@@ -36,25 +33,55 @@ const submissions: TrainingSubmission[] = [
 	}
 ]
 
-export default function TrainingOverview() {
+export function clientLoader() {
+	return fetchData<TrainingPreview[]>("training")
+}
+
+export default function TrainingOverview({ loaderData }: Route.ComponentProps) {
+	const navigate = useNavigate()
 	const user = useUserContext()
 
 	return (
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{trainings.map(training => (
-					<Link to={`/training/${training.id}`}>
+				{loaderData?.data?.map(training => (
+					<Link to={`/training/test/${training.id}`}>
 						<Card>
-							<CardHeader>
-								<CardTitle>{training.name}</CardTitle>
-								<CardDescription>{training.description}</CardDescription>
+							<CardHeader className="flex-row justify-between items-start gap-2 space-y-0">
+								<div className="flex flex-col space-y-1.5">
+									<CardTitle>{training.name}</CardTitle>
+									<CardDescription>{training.description}</CardDescription>
+								</div>
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<Button size="icon" variant="ghost">
+											<EllipsisVertical />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										{training.completed && (
+											<DropdownMenuItem asChild>
+												<Link to={`/training/results/${training.id}`}>
+													Check results
+												</Link>
+											</DropdownMenuItem>
+										)}
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</CardHeader>
 						</Card>
 					</Link>
 				))}
 			</div>
 			{user.role > UserRole.Employee && (
-				<SubmissionsTable submissions={submissions} />
+				<>
+					<SubmissionsTable submissions={submissions} />
+					<Button className="absolute bottom-8 right-8" size="icon" asChild>
+						<Link to="/training/create">
+							<Plus />
+						</Link>
+					</Button>
+				</>
 			)}
 		</main>
 	)
