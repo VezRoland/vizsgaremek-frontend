@@ -7,7 +7,7 @@ import { Navbar } from "~/components/navbar/navbar"
 import type { ApiResponse } from "~/types/response"
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const res = await fetch(`${process.env.VITE_API_URL}/user`, {
+	const res = await fetch(`${import.meta.env.VITE_API_URL}/user`, {
 		headers: request.headers
 	})
 

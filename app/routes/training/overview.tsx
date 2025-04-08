@@ -1,7 +1,8 @@
 import { fetchData, useUserContext } from "~/lib/utils"
 
+import type { Route } from "./+types/overview"
 import { UserRole } from "~/types/database"
-import type { TrainingPreview, TrainingSubmission } from "~/types/results"
+import type { TrainingPreview, TrainingResult } from "~/types/results"
 
 import {
 	Card,
@@ -10,8 +11,7 @@ import {
 	CardTitle
 } from "~/components/ui/card"
 import { SubmissionsTable } from "~/components/training/submissions-table"
-import { Link, useNavigate } from "react-router"
-import type { Route } from "./+types/overview"
+import { Link } from "react-router"
 import { Button } from "~/components/ui/button"
 import { EllipsisVertical, Plus } from "lucide-react"
 import {
@@ -23,7 +23,7 @@ import {
 
 // Mock data
 
-const submissions: TrainingSubmission[] = [
+const submissions: TrainingResult[] = [
 	{
 		id: "a",
 		name: "Test User",
@@ -38,7 +38,6 @@ export function clientLoader() {
 }
 
 export default function TrainingOverview({ loaderData }: Route.ComponentProps) {
-	const navigate = useNavigate()
 	const user = useUserContext()
 
 	return (
@@ -52,22 +51,25 @@ export default function TrainingOverview({ loaderData }: Route.ComponentProps) {
 									<CardTitle>{training.name}</CardTitle>
 									<CardDescription>{training.description}</CardDescription>
 								</div>
-								<DropdownMenu>
-									<DropdownMenuTrigger>
-										<Button size="icon" variant="ghost">
-											<EllipsisVertical />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent>
-										{training.completed && (
-											<DropdownMenuItem asChild>
-												<Link to={`/training/results/${training.id}`}>
-													Check results
-												</Link>
-											</DropdownMenuItem>
-										)}
-									</DropdownMenuContent>
-								</DropdownMenu>
+								{user.role > UserRole.Employee ||
+									(training.completed && (
+										<DropdownMenu>
+											<DropdownMenuTrigger>
+												<Button size="icon" variant="ghost">
+													<EllipsisVertical />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent>
+												{training.completed && (
+													<DropdownMenuItem asChild>
+														<Link to={`/training/results/${training.id}`}>
+															Check results
+														</Link>
+													</DropdownMenuItem>
+												)}
+											</DropdownMenuContent>
+										</DropdownMenu>
+									))}
 							</CardHeader>
 						</Card>
 					</Link>

@@ -1,4 +1,4 @@
-import type { TrainingSubmission } from "~/types/results"
+import type { TrainingResult } from "~/types/results"
 
 import {
 	Table,
@@ -13,7 +13,7 @@ import {
 export function SubmissionsTable({
 	submissions
 }: {
-	submissions: TrainingSubmission[]
+	submissions: TrainingResult[]
 }) {
 	return (
 		<Table>

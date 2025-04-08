@@ -5,7 +5,7 @@ export interface ApiResponse<D = unknown, E = unknown> {
 	message: string
 	data?: D
 	errors?: E
-  redirect?: string
+	redirect?: string
 }
 
 export interface DetailsUser {
@@ -20,8 +20,8 @@ export interface DetailsUser {
 }
 
 export interface ScheduleDetails {
-  schedules: DetailsUser[],
-  pagination: Pagination
+	schedules: DetailsUser[]
+	pagination: Pagination
 }
 
 export interface ScheduleWeek {
@@ -39,47 +39,60 @@ export interface Pagination {
 }
 
 export interface InactiveTraining {
-  id: string,
-  name: string,
-  description: string,
-  fileUrl: string,
-  isActive: false,
-  created_at: string
+	id: string
+	name: string
+	description: string
+	fileUrl: string
+	isActive: false
+	created_at: string
 }
 
 export interface ActiveTraining {
-  id: string,
-	name: string,
-  description: string,
-  isActive: true,
-  questions: TrainingQuestion[]
-  createdAt: string,
+	id: string
+	name: string
+	description: string
+	isActive: true
+	questions: TrainingQuestion[]
+	createdAt: string
 }
 
 export type Training = InactiveTraining | ActiveTraining
 
 export interface TrainingPreview {
-  id: string,
-  name: string,
-  description: string,
-  active: boolean,
-  completed: boolean,
-  createdAt: string
+	id: string
+	name: string
+	description: string
+	active: boolean
+	completed: boolean
+	createdAt: string
 }
 
-export interface TrainingSubmission {
-  id: string,
+export interface TrainingResult {
+	id: string
 	userName: string
 	trainingName: string
-  totalQuestions: number
-  incorrectCount: number
+	questionEvaluations?: TrainingQuestionEvaluation[]
+	totalQuestions: number
+	incorrectCount: number
 	correctCount: number
 	createdAt: string
 }
 
+export interface TrainingQuestionEvaluation {
+	id: string
+  name: string
+	answers: {
+    id: string
+		name: string
+		selectedByUser: boolean
+    correct: boolean
+	}[]
+  multipleCorrect: boolean
+}
+
 export interface TrainingQuestion {
-  id: string,
-  name: string,
-  answers: string[],
-  multipleCorrect: boolean,
+	id: string
+	name: string
+	answers: string[]
+	multipleCorrect: boolean
 }
