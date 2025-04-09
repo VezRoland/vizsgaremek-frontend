@@ -13,6 +13,7 @@ export default [
 			route("new", "routes/schedule/new-schedule.tsx"),
       route("details/:hour/:day", "routes/schedule/schedule-details.tsx")
 		]),
+    route("employees", "routes/employees/employees.tsx"),
 		...prefix("help", [
 			index("routes/help/help.tsx"),
 			route(":ticketId", "routes/help/help-ticket.tsx")
