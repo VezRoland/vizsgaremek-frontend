@@ -325,8 +325,7 @@ export default function CreateTraining({ actionData }: Route.ComponentProps) {
 								onClick={addQuestion}
 								disabled={form.formState.isSubmitting}
 							>
-								<Plus />
-								Add question
+								<Plus /> Add question
 							</Button>
 							<Button
 								className="w-max"

@@ -20,36 +20,46 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu"
+import { Badge } from "~/components/ui/badge"
 
-// Mock data
-
-const submissions: TrainingResult[] = [
-	{
-		id: "a",
-		name: "Test User",
-		training: "Test training",
-		score: "10/15",
-		submittedAt: new Date().toLocaleDateString()
-	}
-]
-
-export function clientLoader() {
-	return fetchData<TrainingPreview[]>("training")
+export async function clientLoader() {
+	const tests = (await fetchData<TrainingPreview[]>("training"))?.data || []
+	const submissions =
+		(
+			await fetchData<TrainingResult[]>("training/results", {
+				disableToast: true
+			})
+		)?.data || []
+	return { tests, submissions }
 }
 
 export default function TrainingOverview({ loaderData }: Route.ComponentProps) {
 	const user = useUserContext()
+	const { tests, submissions } = loaderData
 
 	return (
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{loaderData?.data?.map(training => (
-					<Link to={`/training/test/${training.id}`}>
-						<Card>
+				{tests.map(training => (
+					<Link
+						to={`/training/${
+							user.role === UserRole.Employee ? "test" : "results"
+						}/${training.id}`}
+					>
+						<Card className="h-full">
 							<CardHeader className="flex-row justify-between items-start gap-2 space-y-0">
 								<div className="flex flex-col space-y-1.5">
-									<CardTitle>{training.name}</CardTitle>
+									<CardTitle className="flex gap-2">{training.name}</CardTitle>
 									<CardDescription>{training.description}</CardDescription>
+									<div className="flex gap-2">
+										{(training.active || training.completed) && (
+											<Badge>
+												{training.active
+													? "In progress"
+													: training.completed && "Completed"}
+											</Badge>
+										)}
+									</div>
 								</div>
 								{user.role > UserRole.Employee ||
 									(training.completed && (

@@ -56,6 +56,7 @@ export async function fetchData<T>(
 		headers?: HeadersInit
 		body?: any
 		validate?: boolean
+    disableToast?: boolean
 	}
 ): Promise<ApiResponse<T> | undefined> {
 	const response = await fetch(`http://localhost:3000/${path}`, {
@@ -72,7 +73,7 @@ export async function fetchData<T>(
 		throw data(null, { status: response.status })
 
 	const result: ApiResponse<T> = await response.json()
-	handleServerResponse(result)
+	if (!options?.disableToast) handleServerResponse(result)
 
 	return result
 }
