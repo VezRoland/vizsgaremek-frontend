@@ -56,8 +56,8 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/bun": "^1.2.9",
     "@types/debounce": "^1.2.4",
-    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
     "@types/react-click-outside-hook": "^1.0.3",
@@ -69,5 +69,6 @@
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vite-tsconfig-paths": "^5.1.4"
-  }
+  },
+  "module": "index.ts"
 }
