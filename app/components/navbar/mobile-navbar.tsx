@@ -33,7 +33,7 @@ export default function MobileNavbar({
 
 	return (
 		<nav className="sticky top-0 left-0 max-w-full flex justify-between p-4 border-b bg-background/25 backdrop-blur-md">
-			<img className="h-9" src="favicon.ico" alt="" />
+			<img className="h-9" src="/favicon.ico" alt="Logo" />
 			<Drawer direction="right">
 				<DrawerTrigger asChild>
 					<Button size="icon" variant="ghost">
@@ -42,7 +42,7 @@ export default function MobileNavbar({
 				</DrawerTrigger>
 				<DrawerContent className="h-full">
 					<DrawerHeader className="flex justify-between">
-						<img className="h-9" src="favicon.ico" alt="" />
+						<img className="h-9" src="/favicon.ico" alt="Logo" />
 						<DrawerClose asChild>
 							<Button size="icon" variant="ghost">
 								<X />
@@ -65,15 +65,15 @@ export default function MobileNavbar({
 								</Avatar>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
-								<ActionLoadingWrapper pathname="/" method="DELETE">
+								<ActionLoadingWrapper type="DELETE">
 									<DropdownMenuItem onClick={onSignOut}>
-										Kijelentkezés
+										Sign out
 									</DropdownMenuItem>
 								</ActionLoadingWrapper>
 							</DropdownMenuContent>
 						</DropdownMenu>
 						<div>
-							<ActionLoadingWrapper pathname="/" method="DELETE">
+							<ActionLoadingWrapper type="DELETE">
 								<Button size="icon" variant="ghost" onClick={onSignOut}>
 									<LogOut />
 								</Button>

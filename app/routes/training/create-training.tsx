@@ -1,8 +1,11 @@
+import { redirect, useNavigate, useSubmit } from "react-router"
 import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { trainingSchema } from "~/schemas/training"
-import { cn } from "~/lib/utils"
+import { cn, fetchData } from "~/lib/utils"
+
+import type { Route } from "./+types/create-training"
 
 import {
 	Form,
@@ -15,14 +18,43 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Card, CardFooter } from "~/components/ui/card"
-import { LoaderCircle, Plus, Text, Type } from "lucide-react"
+import {
+	LoaderCircle,
+	Paperclip,
+	Plus,
+	Text,
+	Type,
+	UserRound
+} from "lucide-react"
+import { UserRole } from "~/types/database"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from "~/components/ui/select"
+import { useEffect, type ChangeEvent } from "react"
+import { FileUpload } from "~/components/training/file-upload"
 
-export default function CreateTraining() {
+export async function clientAction({ request }: Route.ClientActionArgs) {
+	const formData = await request.formData()
+	return fetchData("training", {
+		method: "POST",
+		body: formData
+	})
+}
+
+export default function CreateTraining({ actionData }: Route.ComponentProps) {
+	const navigate = useNavigate()
+	const submit = useSubmit()
 	const form = useForm<z.infer<typeof trainingSchema>>({
 		resolver: zodResolver(trainingSchema),
 		defaultValues: {
 			name: "",
-			description: ""
+			description: "",
+			role: UserRole.Employee,
+			file: undefined
 		}
 	})
 
@@ -57,14 +89,21 @@ export default function CreateTraining() {
 	}
 
 	async function onSubmit(values: z.infer<typeof trainingSchema>) {
-		const awaitedValues = await new Promise(resolve => {
-			setTimeout(() => {
-				resolve(values)
-			}, 3000)
-		})
+		const { file, ...data } = values
+		const formData = new FormData()
+		formData.append("file", file)
+		formData.append("data", JSON.stringify(data))
 
-    console.log(awaitedValues)
+		await submit(formData, {
+			method: "POST",
+			encType: "multipart/form-data"
+		})
 	}
+
+	useEffect(() => {
+		if (actionData?.status !== "success") return
+		navigate("/training")
+	}, [actionData])
 
 	return (
 		<main className="w-full max-w-4xl min-h-[calc(100vh-69px)] grid gap-8 px-4 py-8 m-auto">
@@ -103,6 +142,61 @@ export default function CreateTraining() {
 											disabled={form.formState.isSubmitting}
 											{...field}
 										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="role"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Select
+											defaultValue={field.value.toString()}
+											onValueChange={value => field.onChange(parseInt(value))}
+										>
+											<SelectTrigger icon={<UserRound />}>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{Object.entries(UserRole).map(
+													([key, value]) =>
+														isNaN(parseInt(key)) && (
+															<SelectItem key={value} value={value.toString()}>
+																{key}
+															</SelectItem>
+														)
+												)}
+											</SelectContent>
+										</Select>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="file"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<FileUpload
+											accept="application/pdf"
+											onValueChange={file => field.onChange(file)}
+										/>
+										{/* <Input
+											icon={<Paperclip />}
+											type="file"
+											accept="application/pdf, application/vnd.ms-excel"
+											multiple={false}
+											placeholder="Attachement"
+											disabled={form.formState.isSubmitting}
+											onChange={event =>
+												field.onChange(handleFileUpload(event))
+											}
+										/> */}
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -231,8 +325,7 @@ export default function CreateTraining() {
 								onClick={addQuestion}
 								disabled={form.formState.isSubmitting}
 							>
-								<Plus />
-								Add question
+								<Plus /> Add question
 							</Button>
 							<Button
 								className="w-max"
