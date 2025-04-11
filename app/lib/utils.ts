@@ -1,12 +1,13 @@
 import { createContext, useContext } from "react"
+import { data, useNavigate } from "react-router"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
 
-import type { ApiResponse } from "~/types/response"
 import type { User } from "~/types/database"
-import type { ScheduleWeek, DetailsUser } from "~/types/results"
+import type { FormMethod } from "react-router"
+import type { ApiResponse, ScheduleWeek } from "~/types/results"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -44,8 +45,37 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 		success: () => toast.success(response.message)
 	} as Record<string, () => any>
 
-	messageToasts[response.status]()
+	if (response.status !== "ignore") messageToasts[response.status]()
 	if (response.status !== "error" && options?.callback) options.callback()
+}
+
+export async function fetchData<T>(
+	path: string,
+	options?: {
+		method?: FormMethod
+		headers?: HeadersInit
+		body?: any
+		validate?: boolean
+    disableToast?: boolean
+	}
+): Promise<ApiResponse<T> | undefined> {
+	const response = await fetch(`http://localhost:3000/${path}`, {
+		method: options?.method || "GET",
+		headers: options?.headers,
+		...(options?.body ? { body: options.body } : {}),
+		credentials: "include"
+	})
+
+	if (
+		(options?.validate && !response.ok) ||
+		!response.headers.get("Content-Type")?.includes("application/json")
+	)
+		throw data(null, { status: response.status })
+
+	const result: ApiResponse<T> = await response.json()
+	if (!options?.disableToast) handleServerResponse(result)
+
+	return result
 }
 
 export const UserContext = createContext<User | undefined>(undefined)
@@ -60,21 +90,9 @@ export function useUserContext() {
 	return user
 }
 
-export const ScheduleContext = createContext<
-	{ tableData: ScheduleWeek; fieldData?: DetailsUser[] } | undefined
->(undefined)
-
-export function useScheduleContext() {
-	const schedule = useContext(ScheduleContext)
-
-	if (!schedule) {
-		throw Error(
-			"The schedule can only be accessed inside the ScheduleContextProvider!"
-		)
-	}
-
-	return schedule
-}
+export const ScheduleContext = createContext<ScheduleWeek | undefined>(
+	undefined
+)
 
 export const UserSearchContext = createContext<
 	| {

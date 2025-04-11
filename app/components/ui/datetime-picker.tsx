@@ -313,7 +313,7 @@ function Calendar({
 					"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-5 top-5",
 					disableRightNavigation() && "pointer-events-none"
 				),
-				month_grid: "w-full h-full block max-h-[150px] overflow-y-auto border-collapse space-y-1",
+				month_grid: "w-full h-full block overflow-y-auto border-collapse space-y-1",
 				weekdays: cn("flex", props.showWeekNumber && "justify-end"),
 				weekday:
 					"text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",

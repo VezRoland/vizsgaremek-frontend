@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import { X } from "lucide-react"
 import { useEffect, useRef, type ChangeEvent } from "react"
+import { ScrollArea, ScrollBar } from "../ui/scroll-area"
 
 export function UserInput({
 	onValueChange
@@ -22,10 +23,10 @@ export function UserInput({
 	if (searchContext.users.length === 0) return null
 
 	return (
-		<div className="px-4 py-2 border rounded-md shadow-sm">
+		<ScrollArea className="h-40 px-4 py-2 border rounded-md shadow-sm">
 			<ul className="flex flex-col">
 				{searchContext.users.map(user => (
-					<li className="py-2 even:border-t group">
+					<li className="py-2 border-b last:border-none group">
 						<div className="flex items-center gap-4">
 							<Avatar className="w-8 h-8">
 								<AvatarImage></AvatarImage>
@@ -36,6 +37,7 @@ export function UserInput({
 							<span className="text-sm">{user.name}</span>
 							<Button
 								className="w-8 h-8 hidden group-hover:flex ml-auto"
+								type="button"
 								size="icon"
 								variant="ghost"
 								onClick={() => searchContext.remove(user.id)}
@@ -46,6 +48,7 @@ export function UserInput({
 					</li>
 				))}
 			</ul>
-		</div>
+			<ScrollBar orientation="vertical" />
+		</ScrollArea>
 	)
 }
