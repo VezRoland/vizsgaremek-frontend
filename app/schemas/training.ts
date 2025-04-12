@@ -1,4 +1,14 @@
-import { array, object, string, instanceof as instanceof_, boolean } from "zod"
+import {
+	array,
+	object,
+	string,
+	instanceof as instanceof_,
+	boolean,
+	number
+} from "zod"
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+const ACCEPTED_FILE_TYPES = ["application/pdf", "application/vnd.ms-excel"]
 
 const trainingAnswerSchema = object({
 	text: string().min(1, "The answer is required"),
@@ -18,6 +28,13 @@ const trainingQuestionSchema = object({
 export const trainingSchema = object({
 	name: string().min(1, "The test should have a title"),
 	description: string().min(1, "The test should have a description"),
+	role: number(),
+	file: instanceof_(File, { message: "Upload a PDF document" })
+		.refine(file => file.size <= MAX_FILE_SIZE, "Max file size is 5MB")
+		.refine(
+			file => ACCEPTED_FILE_TYPES.includes(file.type),
+			"Only .pdf format is supported"
+		),
 	questions: array(trainingQuestionSchema).min(
 		1,
 		"The test should contain at least 1 question"
@@ -25,11 +42,11 @@ export const trainingSchema = object({
 })
 
 const trainingSubmissionQuestionSchema = object({
-  id: string(),
-  answers: string().array().min(1, "At least one answer should be selected")
+	id: string(),
+	answers: string().array().min(1, "At least one answer should be selected")
 })
 
 export const trainingSubmissionSchema = object({
-  id: string(),
-  questions: array(trainingSubmissionQuestionSchema)
+	id: string(),
+	questions: array(trainingSubmissionQuestionSchema)
 })

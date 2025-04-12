@@ -1,6 +1,15 @@
+import { useEffect } from "react"
+import { Link, useNavigate, useSubmit } from "react-router"
+import { useFieldArray, useForm } from "react-hook-form"
+import type { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { trainingSubmissionSchema } from "~/schemas/training"
+import { fetchData } from "~/lib/utils"
+
+import type { Route } from "./+types/training"
 import type { Training } from "~/types/results"
 
-import { Paperclip } from "lucide-react"
+import { Loader2, Paperclip } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import {
 	Card,
@@ -16,162 +25,47 @@ import {
 	FormItem,
 	FormMessage
 } from "~/components/ui/form"
-import { Input } from "~/components/ui/input"
-import { useFieldArray, useForm } from "react-hook-form"
-import type { z } from "zod"
-import { trainingSubmissionSchema } from "~/schemas/training"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
 import { Checkbox } from "~/components/ui/checkbox"
-import { useEffect } from "react"
 
-const training: Training = {
-	id: crypto.randomUUID(),
-	name: "Software Development Fundamentals",
-	description: "A basic test covering core concepts of software development.",
-	isActive: true,
-	questions: [
-		{
-			id: crypto.randomUUID(),
-			name: "What does HTML stand for?",
-			answers: [
-				"Hyper Text Markup Language",
-				"Highly Technical Modern Language",
-				"Hyperlink and Text Management Language",
-				"Home Tool Markup Language"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following is NOT a primitive data type in JavaScript?",
-			answers: ["string", "number", "boolean", "object"],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "What is the purpose of a version control system like Git?",
-			answers: [
-				"To manage different versions of code",
-				"To automatically deploy code to production",
-				"To write code faster",
-				"To design user interfaces"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following are benefits of using functions in programming?",
-			answers: [
-				"Code reusability",
-				"Improved code organization",
-				"Reduced code complexity",
-				"Faster execution speed"
-			],
-			multipleCorrect: true
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "What is the role of CSS in web development?",
-			answers: [
-				"To define the structure of a web page",
-				"To add interactivity to a web page",
-				"To style the visual presentation of a web page",
-				"To manage server-side logic"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following are common HTTP methods?",
-			answers: ["GET", "POST", "UPDATE", "DELETE"],
-			multipleCorrect: true
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "What is an algorithm?",
-			answers: [
-				"A step-by-step procedure for solving a problem",
-				"A type of computer hardware",
-				"A programming language",
-				"A database management system"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following principles are part of SOLID design principles?",
-			answers: [
-				"Single Responsibility Principle",
-				"Open/Closed Principle",
-				"Liskov Substitution Principle",
-				"Don't Repeat Yourself (DRY)"
-			],
-			multipleCorrect: true
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "What is the purpose of a database?",
-			answers: [
-				"To store and manage data",
-				"To execute code",
-				"To render web pages",
-				"To handle network requests"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following are commonly used data structures?",
-			answers: ["Arrays", "Linked Lists", "Trees", "Functions"],
-			multipleCorrect: true
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "What is the difference between '==' and '===' in JavaScript?",
-			answers: [
-				"'==' compares values, '===' compares values and types",
-				"'===' compares values, '==' compares values and types",
-				"There is no difference",
-				"They are used for different data types"
-			],
-			multipleCorrect: false
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "Which of the following are front-end frameworks/libraries?",
-			answers: ["React", "Angular", "Vue.js", "Node.js"],
-			multipleCorrect: true
+export async function clientAction({ request }: Route.ClientActionArgs) {
+	const data = await request.json()
+
+	switch (request.method) {
+		case "POST": {
+			const { id } = data as z.infer<typeof trainingSubmissionSchema>
+			const result = await fetchData(`training/submission/${id}`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(data)
+			})
+			if (result) result.redirect = "/training"
+			return result
 		}
-	],
-	createdAt: new Date().toLocaleDateString()
+		case "PATCH": {
+			const { id } = data
+			return fetchData(`training/start/${id}`, { method: "POST" })
+		}
+	}
 }
 
-export default function Training() {
-	if (!training.isActive) {
-		return (
-			<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
-				<Card className="border-none shadow-none bg-transparent">
-					<CardHeader>
-						<CardTitle>{training.name}</CardTitle>
-						<CardDescription>{training.description}</CardDescription>
-					</CardHeader>
-					<CardFooter className="justify-end gap-2">
-						<Button>
-							<Paperclip /> Download attachement
-						</Button>
-						<Button variant="secondary">Start test</Button>
-					</CardFooter>
-				</Card>
-			</main>
-		)
-	}
+export function clientLoader({ params: { testId } }: Route.ClientLoaderArgs) {
+	return fetchData<Training>(`training/test/${testId}`, { validate: true })
+}
+
+export default function Training({
+	actionData,
+	loaderData
+}: Route.ComponentProps) {
+	const navigate = useNavigate()
+	const submit = useSubmit()
+	const training = loaderData?.data!
 
 	const form = useForm<z.infer<typeof trainingSubmissionSchema>>({
 		resolver: zodResolver(trainingSubmissionSchema),
 		defaultValues: {
 			id: training.id,
-			questions: training.questions.map(({ id }) => ({ id, answers: [] }))
+			questions: []
 		}
 	})
 
@@ -201,13 +95,57 @@ export default function Training() {
 		form.trigger(`questions.${questionIndex}`)
 	}
 
-	function onSubmit(values: z.infer<typeof trainingSubmissionSchema>) {
-		console.log(values)
+	async function handleClick() {
+		await submit(JSON.stringify({ id: training.id }), {
+			method: "PATCH",
+			encType: "application/json"
+		})
+	}
+
+	async function onSubmit(values: z.infer<typeof trainingSubmissionSchema>) {
+		await submit(JSON.stringify(values), {
+			method: "POST",
+			encType: "application/json"
+		})
 	}
 
 	useEffect(() => {
-		console.log(form.formState.errors)
-	}, [form.getValues()])
+		if (actionData?.redirect) navigate(actionData.redirect)
+	}, [actionData])
+
+	useEffect(() => {
+		form.setValue(
+			"questions",
+			training.isActive
+				? training.questions?.map(({ id }) => ({ id, answers: [] }))
+				: []
+		)
+	}, [loaderData])
+
+	console.log(training)
+
+	if (!training.isActive) {
+		return (
+			<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
+				<Card className="border-none shadow-none bg-transparent">
+					<CardHeader>
+						<CardTitle>{training.name}</CardTitle>
+						<CardDescription>{training.description}</CardDescription>
+					</CardHeader>
+					<CardFooter className="justify-end gap-2">
+						<Button asChild>
+							<Link to={training.fileUrl}>
+								<Paperclip /> Download attachement
+							</Link>
+						</Button>
+						<Button variant="secondary" onClick={handleClick}>
+							Start test
+						</Button>
+					</CardFooter>
+				</Card>
+			</main>
+		)
+	}
 
 	return (
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
@@ -243,7 +181,9 @@ export default function Training() {
 															>
 																<Checkbox
 																	id={`${answer}-${answerIndex}`}
-																	defaultChecked={field.value.includes(answer)}
+																	defaultChecked={field?.value?.includes(
+																		answer
+																	)}
 																	onCheckedChange={(checked: boolean) =>
 																		checked
 																			? handleAddAnswer(questionIndex, answer)
@@ -262,7 +202,7 @@ export default function Training() {
 												) : (
 													<RadioGroup
 														className="grid grid-cols-2 gap-4"
-														defaultValue={field.value[0]}
+														defaultValue={field?.value?.at(0)}
 														onChange={event =>
 															handleSetAnswer(
 																questionIndex,
@@ -294,7 +234,9 @@ export default function Training() {
 							</div>
 						</Card>
 					))}
-					<Button type="submit">Submit</Button>
+					<Button type="submit" disabled={form.formState.isLoading}>
+						{form.formState.isLoading && <Loader2 />} Submit
+					</Button>
 				</form>
 			</Form>
 		</main>

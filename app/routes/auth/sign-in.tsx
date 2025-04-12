@@ -1,14 +1,11 @@
-import { useContext, useEffect } from "react"
-import { useActionData, useNavigate, useSubmit } from "react-router"
-import { createSupabaseServerClient } from "~/lib/supabase"
+import { Link, redirect, useSubmit } from "react-router"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signInSchema } from "~/schemas/auth"
-import { handleServerResponse, UserContext } from "~/lib/utils"
+import { fetchData } from "~/lib/utils"
 
-import type { Route } from "./+types/signin"
-import type { ApiResponse } from "~/types/response"
+import type { Route } from "./+types/sign-in"
 
 import {
 	Card,
@@ -23,61 +20,31 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
-	FormLabel,
 	FormMessage
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { KeyRound, Loader2, Mail } from "lucide-react"
+import type { User } from "@supabase/supabase-js"
 
-export async function action({ request }: Route.ActionArgs) {
+export async function clientAction({ request }: Route.ClientActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signInSchema>
 
-	const { supabase, headers } = createSupabaseServerClient(request)
-	const { error } = await supabase.auth.signInWithPassword(fields)
+	await fetchData("auth/sign-in", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(fields)
+	})
 
-	if (error) {
-		if (error.code === "invalid_credentials") {
-			return Response.json(
-				{
-					status: "error",
-					message:
-						"The sign in failed. Check the provided credentials and try again!",
-					errors: {
-						email: "Invalid email or/and password",
-						password: "Invalid email or/and password"
-					}
-				} satisfies ApiResponse<null, z.infer<typeof signInSchema>>,
-				{ headers, status: 401 }
-			)
-		}
+	const response = await fetchData<User>("auth/user", {
+		headers: { "Cache-Control": "no-cache" },
+		disableToast: true
+	})
 
-		return Response.json(
-			{
-				status: "error",
-				message: "There was an unexpected error. Try again later!"
-			} satisfies ApiResponse,
-			{
-				headers,
-				status: 500
-			}
-		)
-	}
-
-	return Response.json(
-		{
-			status: "success",
-			message: "Successfully signed in."
-		} as ApiResponse,
-		{
-			headers,
-			status: 200
-		}
-	)
+	if (response?.data) return redirect("/")
 }
 
-export default function SignIn({ actionData }: Route.ComponentProps) {
-	const navigate = useNavigate()
+export default function SignIn() {
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof signInSchema>>({
@@ -88,23 +55,21 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 		}
 	})
 
-	const onSubmit = async (values: z.infer<typeof signInSchema>) => {
+	async function onSubmit(values: z.infer<typeof signInSchema>) {
 		await submit(values, {
 			method: "POST",
 			encType: "application/json"
 		})
 	}
 
-	useEffect(() => handleServerResponse(actionData, { form }), [actionData])
-
 	return (
 		<Card className="w-full max-w-xl">
 			<CardHeader>
 				<CardTitle>
-					<h1>Bejelentkezés</h1>
+					<h1>Sign in</h1>
 				</CardTitle>
 				<CardDescription>
-					<p>Jelentkezzen be már meglévő fiókjába.</p>
+					<p>Log into an already existing account.</p>
 				</CardDescription>
 			</CardHeader>
 			<Form {...form}>
@@ -115,12 +80,11 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email cím</FormLabel>
 									<FormControl>
 										<Input
 											icon={<Mail size={16} />}
 											type="email"
-											placeholder="emailcim@domain.com"
+											placeholder="email@domain.com"
 											{...field}
 										/>
 									</FormControl>
@@ -133,7 +97,6 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Jelszó</FormLabel>
 									<FormControl>
 										<Input
 											icon={<KeyRound size={16} />}
@@ -147,7 +110,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							)}
 						/>
 					</CardContent>
-					<CardFooter>
+					<CardFooter className="flex-col gap-2">
 						<Button
 							className="w-full"
 							type="submit"
@@ -156,8 +119,11 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							{form.formState.isSubmitting && (
 								<Loader2 className="animate-spin" />
 							)}
-							Bejelentkezés
+							Sign in
 						</Button>
+						<Link className="underline text-primary" to="/sign-up-employee">
+							I do not have an account.
+						</Link>
 					</CardFooter>
 				</form>
 			</Form>
