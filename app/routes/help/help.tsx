@@ -1,3 +1,6 @@
+import { useSubmit } from "react-router"
+import { hasPermission } from "~/lib/roles"
+import { fetchData, useUserContext } from "~/lib/utils"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -5,8 +8,15 @@ import { ticketSchema } from "~/schemas/ticket"
 
 import type { Route } from "./+types/help"
 import { UserRole, type Ticket } from "~/types/database"
-import type { ApiResponse } from "~/types/response"
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "~/components/ui/card"
 import {
 	Form,
 	FormControl,
@@ -17,30 +27,17 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle
-} from "~/components/ui/card"
 import { Button } from "~/components/ui/button"
-import { useSubmit } from "react-router"
-import { useEffect } from "react"
-import { handleServerResponse, useUserContext } from "~/lib/utils"
-import { Loader2 } from "lucide-react"
-import { HelpTicketStatus } from "~/components/help-ticket-status"
 import { HelpTicketPreview } from "~/components/help-ticket-preview"
 import { Separator } from "~/components/ui/separator"
 import {
-	Select,
+  Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger
 } from "~/components/ui/select"
 import { SelectValue } from "@radix-ui/react-select"
-import { hasPermission } from "~/lib/roles"
+import { Loader2, Type } from "lucide-react"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
@@ -52,26 +49,20 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 				company_id: JSON.parse(data.company_id)
 			} as z.infer<typeof ticketSchema>
 
-			const response = await fetch("http://localhost:3000/ticket", {
+			await fetchData("ticket", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				credentials: "include",
 				body: JSON.stringify(newTicket)
 			})
-
-			return response
 	}
 }
 
 export async function clientLoader() {
-	const response = await fetch("http://localhost:3000/ticket/all", {
-		credentials: "include"
-	})
-	const tickets = (await response.json()) as ApiResponse<Ticket[]>
-	return tickets.data || []
+	const response = await fetchData<Ticket[]>("ticket/all")
+	return response?.data || []
 }
 
-export default function Help({ actionData, loaderData }: Route.ComponentProps) {
+export default function Help({ loaderData }: Route.ComponentProps) {
 	const user = useUserContext()
 	const submit = useSubmit()
 
@@ -99,8 +90,6 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 		})
 	}
 
-	useEffect(() => handleServerResponse(actionData, { form }), [actionData])
-
 	return (
 		<main className="w-full max-w-4xl grid gap-8 px-4 py-8 m-auto">
 			{hasPermission(user, "tickets", "create") && (
@@ -116,66 +105,67 @@ export default function Help({ actionData, loaderData }: Route.ComponentProps) {
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)}>
 							<CardContent>
-								<FormField
-									control={form.control}
-									name="title"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Title</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Short, descriptive title"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								{user.role !== UserRole.Owner && (
+								<div className="flex flex-col gap-2">
 									<FormField
 										control={form.control}
-										name="company_id"
+										name="title"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Receiver</FormLabel>
 												<FormControl>
-													<Select
-														onValueChange={field.onChange}
-														defaultValue={field.value}
-													>
-														<SelectTrigger>
-															<SelectValue placeholder="Receiver" />
-														</SelectTrigger>
-														<SelectContent>
-															<SelectItem value={user.company_id}>
-																Company
-															</SelectItem>
-															<SelectItem value="null">Admin</SelectItem>
-														</SelectContent>
-													</Select>
+													<Input
+														icon={<Type />}
+														placeholder="Short, descriptive title"
+														{...field}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
-								)}
-								<FormField
-									control={form.control}
-									name="content"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Description</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Detailed description"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
+									{user.role !== UserRole.Owner && (
+										<FormField
+											control={form.control}
+											name="company_id"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Receiver</FormLabel>
+													<FormControl>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
+															<SelectTrigger>
+																<SelectValue placeholder="Receiver" />
+															</SelectTrigger>
+															<SelectContent>
+																<SelectItem value={user.company_id}>
+																	Company
+																</SelectItem>
+																<SelectItem value="null">Admin</SelectItem>
+															</SelectContent>
+														</Select>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
 									)}
-								/>
+									<FormField
+										control={form.control}
+										name="content"
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<Textarea
+														placeholder="Detailed description"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 							</CardContent>
 							<CardFooter className="justify-end">
 								<Button type="submit" disabled={form.formState.isSubmitting}>
