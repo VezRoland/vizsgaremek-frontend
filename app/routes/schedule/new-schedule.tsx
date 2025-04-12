@@ -72,6 +72,8 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	const [searchParams] = useSearchParams()
 	const user = useUserContext()
 
+  const data = loaderData?.data
+
 	const form = useForm<FormData>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
@@ -170,9 +172,9 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 													<FormItem className="flex-1 flex-col">
 														<FormControl>
 															<UserSearch
-																data={loaderData?.users}
+																data={data?.users}
 																pageLimit={
-																	loaderData?.pagination?.totalPages
+																	data?.pagination?.totalPages
 																}
 															/>
 														</FormControl>

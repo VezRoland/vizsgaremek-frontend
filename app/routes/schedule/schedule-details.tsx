@@ -82,6 +82,7 @@ export default function Details({ params, loaderData }: Route.ComponentProps) {
 	const [searchParams] = useSearchParams()
 	const user = useUserContext()
 
+  const data = loaderData?.data
 	const { hour, day } = params
 
 	if (user.role === UserRole.Employee) {
@@ -90,9 +91,9 @@ export default function Details({ params, loaderData }: Route.ComponentProps) {
 		const form = useForm<z.infer<typeof scheduleSchema>>({
 			resolver: zodResolver(scheduleSchema),
 			defaultValues: {
-				category: loaderData?.schedules?.at(0)?.category.toString(),
-				start: new Date(loaderData?.schedules?.at(0)?.start || new Date()),
-				end: new Date(loaderData?.schedules?.at(0)?.end || new Date()),
+				category: data?.schedules?.at(0)?.category.toString(),
+				start: new Date(data?.schedules?.at(0)?.start || new Date()),
+				end: new Date(data?.schedules?.at(0)?.end || new Date()),
 				user_id: user.id
 			}
 		})
@@ -207,8 +208,8 @@ export default function Details({ params, loaderData }: Route.ComponentProps) {
 				</DialogHeader>
 
 				<UsersTable
-					data={loaderData?.schedules}
-					pageLimit={loaderData?.pagination.totalPages}
+					data={data?.schedules}
+					pageLimit={data?.pagination.totalPages}
 				/>
 			</DialogContent>
 		</Dialog>

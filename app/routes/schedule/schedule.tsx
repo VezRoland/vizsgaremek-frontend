@@ -21,11 +21,13 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {
+  const data = loaderData?.data
+
 	return (
 		<>
 			<Outlet />
 			<main className="h-[calc(100vh-69px)] p-4">
-				<ScheduleTable data={loaderData!} />
+				<ScheduleTable data={data!} />
 			</main>
 		</>
 	)
