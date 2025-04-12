@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react"
-import { data } from "react-router"
+import { data, useNavigate } from "react-router"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -62,6 +62,7 @@ export async function fetchData<D = unknown, E = unknown>(
 		method: options?.method || "GET",
 		headers: options?.headers,
 		...(options?.body ? { body: options.body } : {}),
+		...(options?.body ? { body: options.body } : {}),
 		credentials: "include"
 	})
 
@@ -74,6 +75,7 @@ export async function fetchData<D = unknown, E = unknown>(
 	const result: ApiResponse<D, E> = await response.json()
 	if (!options?.disableToast) handleServerResponse(result)
 
+	return result
 	return result
 }
 
