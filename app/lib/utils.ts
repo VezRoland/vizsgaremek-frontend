@@ -58,7 +58,7 @@ export async function fetchData<D = unknown, E = unknown>(
 		disableToast?: boolean
 	}
 ): Promise<ApiResponse<D, E> | undefined> {
-	const response = await fetch(`http://localhost:3000/${path}`, {
+	const response = await fetch(`${import.meta.env.VITE_API_URL}/${path}`, {
 		method: options?.method || "GET",
 		headers: options?.headers,
 		...(options?.body ? { body: options.body } : {}),

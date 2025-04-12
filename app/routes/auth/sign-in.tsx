@@ -1,11 +1,9 @@
-import { useEffect } from "react"
-import { Link, redirect, useNavigate, useSubmit } from "react-router"
-import { createSupabaseServerClient } from "~/lib/supabase"
+import { Link, redirect, useSubmit } from "react-router"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signInSchema } from "~/schemas/auth"
-import { fetchData, handleServerResponse } from "~/lib/utils"
+import { fetchData } from "~/lib/utils"
 
 import type { Route } from "./+types/sign-in"
 
@@ -46,7 +44,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 	if (response?.data) return redirect("/")
 }
 
-export default function SignIn({ actionData }: Route.ComponentProps) {
+export default function SignIn() {
 	const submit = useSubmit()
 
 	const form = useForm<z.infer<typeof signInSchema>>({
@@ -63,8 +61,6 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 			encType: "application/json"
 		})
 	}
-
-	useEffect(() => handleServerResponse(actionData, { form }), [actionData])
 
 	return (
 		<Card className="w-full max-w-xl">
