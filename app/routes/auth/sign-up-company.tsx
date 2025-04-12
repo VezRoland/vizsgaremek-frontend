@@ -1,15 +1,12 @@
 import { useEffect } from "react"
-import { Link, useNavigate, useSubmit } from "react-router"
-import { createSupabaseServerClient } from "~/lib/supabase"
+import { Link, redirect, useSubmit } from "react-router"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signUpEmployeeSchema } from "~/schemas/auth"
-import { handleServerResponse } from "~/lib/utils"
+import { signUpCompanySchema } from "~/schemas/auth"
+import { fetchData } from "~/lib/utils"
 
-import type { Route } from "./+types/signup-employee"
-import type { ApiResponse } from "~/types/results"
-import { UserRole, type Company } from "~/types/database"
+import type { Route } from "./+types/sign-up-company"
 
 import {
 	Card,
@@ -29,120 +26,70 @@ import {
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { TabsContent } from "~/components/ui/tabs"
-import {
-	KeyRound,
-	Loader2,
-	Mail,
-	SquareAsterisk,
-	UserRound
-} from "lucide-react"
+import { Building2, KeyRound, Loader2, Mail, UserRound } from "lucide-react"
 
-export async function action({ request }: Route.ActionArgs) {
-	const fields = (await request.json()) as z.infer<typeof signUpEmployeeSchema>
+export async function clientAction({ request }: Route.ActionArgs) {
+	const fields = (await request.json()) as z.infer<typeof signUpCompanySchema>
 
-	const { supabase, headers } = createSupabaseServerClient(request)
-	const { data, error } = await supabase.auth.admin.createUser({
-		email: fields.email,
-		password: fields.password,
-		user_metadata: {
-			name: fields.name,
-			role: UserRole.Employee
-		},
-		email_confirm: true
+	const response = await fetchData<
+		unknown,
+		z.infer<typeof signUpCompanySchema>
+	>("auth/sign-up/company", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(fields)
 	})
 
-	if (error) {
-		if (error.code === "email_exists") {
-			return Response.json(
-				{
-					status: "error",
-					message: "The registration failed.",
-					errors: {
-						email: "There is already a user with the same email address."
-					}
-				} as ApiResponse<null, z.infer<typeof signUpEmployeeSchema>>,
-				{
-					headers,
-					status: 403
-				}
-			)
-		}
-
-		return Response.json(
-			{
-				status: "error",
-				message: "An unexpected error occoured. Try again!"
-			} as ApiResponse,
-			{
-				headers,
-				status: 403
-			}
-		)
-	}
-
-	const res = await fetch(`${process.env.VITE_API_URL}/company/${fields.code}`)
-
-	if (res.status !== 200) {
-		await supabase.auth.admin.deleteUser(data.user!.id)
-		return Response.json(await res.json(), { headers })
-	}
-
-	const company = (await res.json()) as Company
-	await supabase.auth.admin.updateUserById(data.user!.id, {
-		user_metadata: { company_id: company.id }
-	})
-
-	return Response.json(
-		{
-			status: "success",
-			message: "The registration was successful."
-		} as ApiResponse,
-		{
-			headers,
-			status: 200
-		}
-	)
+	if (response?.status === "success") return redirect("/sign-in")
+	return response
 }
 
-export default function SignUpEmployee({ actionData }: Route.ComponentProps) {
-	const navigate = useNavigate()
+export default function SignUpCompany({ actionData }: Route.ComponentProps) {
 	const submit = useSubmit()
 
-	const form = useForm<z.infer<typeof signUpEmployeeSchema>>({
-		resolver: zodResolver(signUpEmployeeSchema),
+	const form = useForm<z.infer<typeof signUpCompanySchema>>({
+		resolver: zodResolver(signUpCompanySchema),
 		defaultValues: {
 			name: "",
 			email: "",
 			password: "",
-			code: ""
+			company_name: ""
 		}
 	})
 
-	const onSubmit = async (values: z.infer<typeof signUpEmployeeSchema>) => {
+	useEffect(() => {
+		if (actionData?.errors) {
+			Object.entries(actionData.errors).map(([field, errors]) => {
+				form.setError(
+					field as
+						| "name"
+						| "email"
+						| "password"
+						| "company_name"
+						| "root"
+						| `root.${string}`,
+					{ message: errors }
+				)
+			})
+		}
+	}, [actionData])
+
+	const onSubmit = async (values: z.infer<typeof signUpCompanySchema>) => {
 		await submit(values, {
 			method: "POST",
 			encType: "application/json"
 		})
 	}
 
-	useEffect(
-		() =>
-			handleServerResponse(actionData, {
-				form,
-				callback: async () => await navigate("/signin")
-			}),
-		[actionData]
-	)
-
 	return (
-		<TabsContent value="employee">
+		<TabsContent value="company">
 			<Card className="w-full">
 				<CardHeader>
 					<CardTitle>
-						<h1>Register an Employee</h1>
+						<h1>Register a Company</h1>
 					</CardTitle>
 					<CardDescription>
-						<p>Register a new employee account.</p>
+						<p>Register a new company account.</p>
 					</CardDescription>
 				</CardHeader>
 				<Form {...form}>
@@ -200,13 +147,13 @@ export default function SignUpEmployee({ actionData }: Route.ComponentProps) {
 							/>
 							<FormField
 								control={form.control}
-								name="code"
+								name="company_name"
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
 											<Input
-												icon={<SquareAsterisk size={16} />}
-												placeholder="########"
+												icon={<Building2 size={16} />}
+												placeholder="Company Name"
 												{...field}
 											/>
 										</FormControl>

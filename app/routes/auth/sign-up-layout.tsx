@@ -11,14 +11,14 @@ export default function SignupLayout() {
 	return (
 		<Tabs
 			className="w-full max-w-xl flex flex-col gap-2"
-			value={pathname.split("-")[1]}
+			value={pathname.split("-")[2]}
 		>
 			<TabsList className="h-full">
 				<Button variant="ghost" asChild>
 					<TabsTrigger
 						className="flex-1"
 						value="employee"
-						onClick={() => navigate("/signup-employee")}
+						onClick={() => navigate("/sign-up-employee")}
 					>
 						<UserRound />
 						Employee
@@ -28,7 +28,7 @@ export default function SignupLayout() {
 					<TabsTrigger
 						className="flex-1"
 						value="company"
-						onClick={() => navigate("/signup-company")}
+						onClick={() => navigate("/sign-up-company")}
 					>
 						<Building2 />
 						Company

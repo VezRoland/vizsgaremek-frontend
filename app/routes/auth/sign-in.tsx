@@ -1,14 +1,13 @@
 import { useEffect } from "react"
-import { Link, useNavigate, useSubmit } from "react-router"
+import { Link, redirect, useNavigate, useSubmit } from "react-router"
 import { createSupabaseServerClient } from "~/lib/supabase"
 import type { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signInSchema } from "~/schemas/auth"
-import { handleServerResponse } from "~/lib/utils"
+import { fetchData, handleServerResponse } from "~/lib/utils"
 
-import type { Route } from "./+types/signin"
-import type { ApiResponse } from "~/types/results"
+import type { Route } from "./+types/sign-in"
 
 import {
 	Card,
@@ -28,51 +27,23 @@ import {
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { KeyRound, Loader2, Mail } from "lucide-react"
+import type { User } from "@supabase/supabase-js"
 
-export async function action({ request }: Route.ActionArgs) {
+export async function clientAction({ request }: Route.ClientActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signInSchema>
 
-	const { supabase, headers } = createSupabaseServerClient(request)
-	const { error } = await supabase.auth.signInWithPassword(fields)
+	await fetchData("auth/sign-in", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(fields)
+	})
 
-	if (error) {
-		if (error.code === "invalid_credentials") {
-			return Response.json(
-				{
-					status: "error",
-					message:
-						"The sign in failed. Check the provided credentials and try again!",
-					errors: {
-						email: "Invalid email or/and password",
-						password: "Invalid email or/and password"
-					}
-				} satisfies ApiResponse<null, z.infer<typeof signInSchema>>,
-				{ headers, status: 401 }
-			)
-		}
+	const response = await fetchData<User>("auth/user", {
+		headers: { "Cache-Control": "no-cache" },
+		disableToast: true
+	})
 
-		return Response.json(
-			{
-				status: "error",
-				message: "There was an unexpected error. Try again later!"
-			} satisfies ApiResponse,
-			{
-				headers,
-				status: 500
-			}
-		)
-	}
-
-	return Response.json(
-		{
-			status: "success",
-			message: "Successfully signed in."
-		} as ApiResponse,
-		{
-			headers,
-			status: 200
-		}
-	)
+	if (response?.data) return redirect("/")
 }
 
 export default function SignIn({ actionData }: Route.ComponentProps) {
@@ -154,7 +125,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 							)}
 							Sign in
 						</Button>
-						<Link className="underline text-primary" to="/signup-employee">
+						<Link className="underline text-primary" to="/sign-up-employee">
 							I do not have an account.
 						</Link>
 					</CardFooter>
