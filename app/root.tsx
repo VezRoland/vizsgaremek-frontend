@@ -9,7 +9,7 @@ import {
 	ScrollRestoration,
 	useActionData
 } from "react-router"
-import { handleServerResponse } from "./lib/utils"
+import { fetchData, handleServerResponse } from "./lib/utils"
 
 import type { Route } from "./+types/root"
 import type { ApiResponse } from "./types/results"
@@ -32,22 +32,12 @@ export const links: Route.LinksFunction = () => [
 	}
 ]
 
-export async function action({ request }: Route.ActionArgs) {
-	const { supabase, headers } = createSupabaseServerClient(request)
-
-	await supabase.auth.signOut()
-
-	return Response.json(
-		{
-			status: "success",
-			type: "message",
-			message: "Successfully signed out."
-		} as ApiResponse,
-		{
-			headers,
-			status: 200
-		}
-	)
+export async function clientAction() {
+	await fetchData("auth/sign-out", { method: "POST" })
+	await fetchData("auth/user", {
+		headers: { "Cache-Control": "no-cache" },
+		disableToast: true
+	})
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -60,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-        <LoadingBar />
+				<LoadingBar />
 				{children}
 				<Toaster />
 				<ScrollRestoration />

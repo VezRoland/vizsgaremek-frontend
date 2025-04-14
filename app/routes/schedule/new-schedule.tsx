@@ -1,6 +1,9 @@
-import { useEffect } from "react"
-import { useNavigate, useSubmit } from "react-router"
-import { cn, handleServerResponse, useUserContext } from "~/lib/utils"
+import { useNavigate, useSearchParams, useSubmit } from "react-router"
+import {
+	cn,
+	fetchData,
+	useUserContext
+} from "~/lib/utils"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { z } from "zod"
@@ -9,7 +12,6 @@ import { scheduleSchema } from "~/schemas/schedule"
 import type { Route } from "./+types/new-schedule"
 import { ScheduleCategory, UserRole, type User } from "~/types/database"
 import type { Pagination } from "~/types/results"
-import type { ApiResponse } from "~/types/results"
 
 import { UserInput } from "~/components/schedule-table/user-input"
 import { UserSearchProvider } from "~/components/schedule-table/user-search-provider"
@@ -48,56 +50,35 @@ interface Search {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New Schedule" },
-    { name: "description", content: "Create a new schedule" }
-  ]
+	return [
+		{ title: "New Shift" },
+		{ name: "description", content: "Create a new shift." }
+	]
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data: FormData = await request.json()
-
-	const response = await fetch(
-		"http://localhost:3000/schedule?week_start=2025-03-23T00:00:00",
-		{
-			method: "POST",
-			body: JSON.stringify(data),
-			headers: {
-				"Content-Type": "application/json"
-			},
-			credentials: "include"
-		}
-	)
-
-	return response.json() as Promise<ApiResponse>
+	return fetchData("schedule", { method: "POST", body: data })
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-
-	const response = await fetch(
-		`http://localhost:3000/schedule/users?name=${searchParams.get(
-			"search"
-		)}&page=${searchParams.get("page")}`,
-		{ credentials: "include" }
-	)
-
-	return response.json() as Promise<ApiResponse<Search>>
+	return fetchData<Search>(`schedule/users?${searchParams.toString()}`)
 }
 
-export default function NewSchedule({
-	actionData,
-	loaderData
-}: Route.ComponentProps) {
+export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	const submit = useSubmit()
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const user = useUserContext()
+
+  const data = loaderData?.data
 
 	const form = useForm<FormData>({
 		resolver: zodResolver(scheduleSchema),
 		defaultValues: {
-			start: new Date(),
-			end: new Date(),
+			start: new Date(searchParams.get("weekStart") || new Date()),
+			end: new Date(searchParams.get("weekStart") || new Date()),
 			category: "1",
 			user_id: user.role === UserRole.Employee ? JSON.stringify([user.id]) : ""
 		}
@@ -118,24 +99,20 @@ export default function NewSchedule({
 		)
 	}
 
-	useEffect(
-		() =>
-			handleServerResponse(actionData, {
-				callback: () => navigate("/schedule")
-			}),
-		[actionData]
-	)
-
 	return (
 		<Dialog
-			onOpenChange={open => (!open ? navigate("/schedule") : null)}
+			onOpenChange={open =>
+				!open
+					? navigate(`/schedule?${searchParams.toString()}`)
+					: null
+			}
 			defaultOpen={true}
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Create Schedule</DialogTitle>
+					<DialogTitle>New Shift</DialogTitle>
 					<DialogDescription>
-						Add a new record to the already existing work schedules.
+						Create a new paid work shift, or an unpaid day off.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -195,9 +172,9 @@ export default function NewSchedule({
 													<FormItem className="flex-1 flex-col">
 														<FormControl>
 															<UserSearch
-																data={loaderData.data?.users}
+																data={data?.users}
 																pageLimit={
-																	loaderData.data?.pagination.totalPages
+																	data?.pagination?.totalPages
 																}
 															/>
 														</FormControl>
@@ -269,10 +246,6 @@ export default function NewSchedule({
 								<Button
 									type="button"
 									variant="outline"
-									disabled={
-										form.formState.isSubmitting ||
-										Object.keys(form.formState.errors).length > 0
-									}
 								>
 									Cancel
 								</Button>

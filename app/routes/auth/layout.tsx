@@ -1,13 +1,9 @@
 import { Outlet, redirect } from "react-router"
+import { fetchData } from "~/lib/utils"
 
-import type { Route } from "./+types/layout"
-import { createSupabaseServerClient } from "~/lib/supabase"
-
-export async function loader({ request }: Route.LoaderArgs) {
-  const { supabase, headers } = createSupabaseServerClient(request)
-
-  const { data } = await supabase.auth.getUser()
-  if (data.user) return redirect("/", { headers })
+export async function clientLoader() {
+	const response = await fetchData("auth/user", { disableToast: true })
+	if (response?.data) return redirect("/")
 }
 
 export default function AuthLayout() {

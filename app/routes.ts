@@ -14,14 +14,22 @@ export default [
       route("details/:hour/:day", "routes/schedule/schedule-details.tsx")
 		]),
     route("employees", "routes/employees/employees.tsx"),
+    ...prefix("training", [
+      index("routes/training/overview.tsx"),
+      route("test/:testId", "routes/training/training.tsx"),
+      route("results/:testId", "routes/training/results.tsx"),
+      route("create", "routes/training/create-training.tsx")
+    ]),
 		...prefix("help", [
 			index("routes/help/help.tsx"),
 			route(":ticketId", "routes/help/help-ticket.tsx")
 		])
 	]),
 	layout("routes/auth/layout.tsx", [
-		route("signin", "routes/auth/signin.tsx"),
-		route("signup-owner", "routes/auth/signup-owner.tsx"),
-		route("signup-employee", "routes/auth/signup-employee.tsx")
+		route("sign-in", "routes/auth/sign-in.tsx"),
+    layout("routes/auth/sign-up-layout.tsx", [
+      route("sign-up-company", "routes/auth/sign-up-company.tsx"),
+      route("sign-up-employee", "routes/auth/sign-up-employee.tsx")
+    ])
 	])
 ] satisfies RouteConfig

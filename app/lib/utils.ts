@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react"
-import { data } from "react-router"
+import { data, useNavigate } from "react-router"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -22,8 +22,7 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 ) => {
 	if (!response) return
 
-	if (response.errors) {
-		if (!options?.form) return
+	if (response.errors && options?.form) {
 		Object.entries<string>(response.errors as FieldValues).forEach(
 			([name, message]) => {
 				options.form!.setError(
@@ -49,19 +48,21 @@ export const handleServerResponse = <D = unknown, E = unknown>(
 	if (response.status !== "error" && options?.callback) options.callback()
 }
 
-export async function fetchData<T>(
+export async function fetchData<D = unknown, E = unknown>(
 	path: string,
 	options?: {
 		method?: FormMethod
 		headers?: HeadersInit
 		body?: any
 		validate?: boolean
+		disableToast?: boolean
 	}
-): Promise<T | undefined> {
-	const response = await fetch(`http://localhost:3000/${path}`, {
+): Promise<ApiResponse<D, E> | undefined> {
+	const response = await fetch(`${import.meta.env.VITE_API_URL}/${path}`, {
 		method: options?.method || "GET",
 		headers: options?.headers,
-		...(options?.body ? { body: JSON.stringify(options.body) } : {}),
+		...(options?.body ? { body: options.body } : {}),
+		...(options?.body ? { body: options.body } : {}),
 		credentials: "include"
 	})
 
@@ -71,10 +72,11 @@ export async function fetchData<T>(
 	)
 		throw data(null, { status: response.status })
 
-	const result: ApiResponse<T> = await response.json()
-	handleServerResponse(result)
+	const result: ApiResponse<D, E> = await response.json()
+	if (!options?.disableToast) handleServerResponse(result)
 
-	return result.data
+	return result
+	return result
 }
 
 export const UserContext = createContext<User | undefined>(undefined)

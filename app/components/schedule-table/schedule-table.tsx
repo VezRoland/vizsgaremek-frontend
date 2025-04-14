@@ -3,7 +3,7 @@ import { ScheduleContext } from "~/lib/utils"
 import { ScheduleCategory } from "~/types/database"
 import type { ScheduleWeek } from "~/types/results"
 
-import { Link } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { Button } from "../ui/button"
 import { ScheduleTableItem } from "./schedule-table-item"
 import {
@@ -27,34 +27,51 @@ const DAYS = [
 ]
 
 export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	function setWeekStart(weekStart: string) {
+		setSearchParams(prevParams => {
+			prevParams.set("weekStart", weekStart)
+			return prevParams
+		})
+	}
+
+	function setCategory(category: string) {
+		setSearchParams(prevParams => {
+			if (category === "all") prevParams.delete("category")
+			else prevParams.set("category", category)
+			return prevParams
+		})
+	}
+
 	return (
 		<ScheduleContext.Provider value={data}>
 			<section className="w-full h-full flex flex-col gap-4">
 				<div className="flex flex-wrap justify-between items-center gap-2">
 					<div className="flex flex-1 justify-between">
-						<Link
-							className="grid flex-1 place-content-center"
-							to={`/schedule${
-								data?.prevDate ? `?week_start=${data.prevDate}` : ""
-							}`}
+						<Button
+							size="icon"
+							variant="ghost"
+							disabled={!data?.prevDate}
+							onClick={() => data?.prevDate && setWeekStart(data.prevDate)}
 						>
-							<Button size="icon" variant="ghost" disabled={!data?.prevDate}>
-								<ChevronLeft />
-							</Button>
-						</Link>
-						<Link
-							className="grid flex-1 place-content-center"
-							to={`/schedule${
-								data?.nextDate ? `?week_start=${data.nextDate}` : ""
-							}`}
+							<ChevronLeft />
+						</Button>
+						<Button
+							size="icon"
+							variant="ghost"
+							disabled={!data?.nextDate}
+							onClick={() => data?.nextDate && setWeekStart(data.nextDate)}
 						>
-							<Button size="icon" variant="ghost" disabled={!data?.nextDate}>
-								<ChevronRight />
-							</Button>
-						</Link>
+							<ChevronRight />
+						</Button>
 					</div>
 					<div className="w-max flex flex-[999] gap-4">
-						<Select defaultValue="all">
+						<Select
+							key={new Date().getTime()}
+							defaultValue={searchParams.get("category") || "all"}
+							onValueChange={setCategory}
+						>
 							<SelectTrigger className="max-w-max ml-auto" icon={<HandCoins />}>
 								<SelectValue placeholder="Choose a category" />
 							</SelectTrigger>
@@ -69,7 +86,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 							</SelectContent>
 						</Select>
 						<Button className="aspect-square" size="icon" asChild>
-							<Link to="/schedule/new">
+							<Link to={`/schedule/new?${searchParams.toString()}`}>
 								<Plus />
 							</Link>
 						</Button>
@@ -86,7 +103,7 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 										{data && (
 											<span className="font-normal">
 												{new Date(
-													new Date(data.week_start).getTime() + i * DAY
+													new Date(data.weekStart).getTime() + (i + 1) * DAY
 												).toLocaleDateString(undefined, {
 													month: "2-digit",
 													day: "2-digit"
