@@ -16,6 +16,7 @@ export default [
 		route("employees", "routes/employees/employees.tsx", [
 			route(":userId", "routes/employees/edit-employee.tsx")
 		]),
+    route("companies", "routes/companies/companies.tsx"),
 		...prefix("training", [
 			index("routes/training/overview.tsx"),
 			route("test/:testId", "routes/training/training.tsx"),

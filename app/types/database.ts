@@ -20,7 +20,8 @@ export interface Company {
 	id: string
 	name: string
 	code: string
-	created_at: string
+  verified: boolean
+	createdAt: string
 }
 
 export interface Schedule {
