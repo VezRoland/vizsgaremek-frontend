@@ -62,7 +62,6 @@ export async function fetchData<D = unknown, E = unknown>(
 		method: options?.method || "GET",
 		headers: options?.headers,
 		...(options?.body ? { body: options.body } : {}),
-		...(options?.body ? { body: options.body } : {}),
 		credentials: "include"
 	})
 

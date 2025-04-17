@@ -2,11 +2,11 @@ export interface User {
 	id: string
 	name: string
 	age?: number
-	hourly_wage?: number
+	hourlyWage?: number
 	role: UserRole
-	company_id: string
+	companyId: string
 	verified: boolean
-	created_at: string
+	createdAt: string
 }
 
 export enum UserRole {
@@ -20,7 +20,8 @@ export interface Company {
 	id: string
 	name: string
 	code: string
-	created_at: string
+  verified: boolean
+	createdAt: string
 }
 
 export interface Schedule {
