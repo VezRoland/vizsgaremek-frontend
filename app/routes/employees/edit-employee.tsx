@@ -9,7 +9,7 @@ import {
 import type { Route } from "./+types/edit-employee"
 import { UserRole, type User } from "~/types/database"
 import { Button } from "~/components/ui/button"
-import { useNavigate, useSubmit } from "react-router"
+import { redirect, useNavigate, useSubmit } from "react-router"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { editEmployeeSchema } from "~/schemas/management"
@@ -30,24 +30,25 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "~/components/ui/select"
+import { fetchData } from "~/lib/utils"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
-	console.log(data)
+	await fetchData(`company/user/${data.id}`, {
+		method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ hourlyWage: data.hourlyWage, role: data.role })
+	})
+  return redirect("/employees")
 }
 
-export function clientLoader() {
-	const employee: User = {
-		id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-		name: "Alice Johnson",
-		age: 42,
-		role: 3,
-		companyId: "company-2",
-		verified: true,
-		createdAt: "2024-07-03T15:22:18.456Z"
-	}
-
-	return employee
+export async function clientLoader({
+	params: { userId }
+}: Route.ClientLoaderArgs) {
+	const response = await fetchData<User>(`company/user/${userId}`, {
+		validate: true
+	})
+	return response?.data!
 }
 
 export default function Employee({ loaderData }: Route.ComponentProps) {
