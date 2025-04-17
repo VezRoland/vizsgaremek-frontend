@@ -22,7 +22,8 @@ export default [
 		...prefix("help", [
 			index("routes/help/help.tsx"),
 			route(":ticketId", "routes/help/help-ticket.tsx")
-		])
+		]),
+    route("settings", "routes/settings.tsx")
 	]),
 	layout("routes/auth/layout.tsx", [
 		route("sign-in", "routes/auth/sign-in.tsx"),
