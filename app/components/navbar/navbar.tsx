@@ -13,10 +13,7 @@ export function Navbar({ onSignOut }: { onSignOut: () => void }) {
 		{ name: "Home", path: "/", minRole: UserRole.Employee },
 		{
 			name: "Management",
-			path: [
-				{ name: "Employees", path: "/employees", minRole: UserRole.Leader },
-				{ name: "Company", path: "/company", minRole: UserRole.Owner }
-			],
+			path: "/employees",
 			minRole: UserRole.Leader
 		},
 		{ name: "Schedule", path: "/schedule", minRole: UserRole.Employee },

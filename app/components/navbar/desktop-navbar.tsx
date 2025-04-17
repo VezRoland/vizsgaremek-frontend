@@ -42,7 +42,7 @@ export default function DesktopNavbar({
 				<DropdownMenuContent>
 					<ActionLoadingWrapper type="DELETE">
 						<DropdownMenuItem onClick={onSignOut}>
-							Kijelentkezés
+							Sign out
 						</DropdownMenuItem>
 					</ActionLoadingWrapper>
 				</DropdownMenuContent>
