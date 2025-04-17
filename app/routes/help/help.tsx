@@ -10,12 +10,12 @@ import type { Route } from "./+types/help"
 import { UserRole, type Ticket } from "~/types/database"
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle
 } from "~/components/ui/card"
 import {
 	Form,
@@ -31,7 +31,7 @@ import { Button } from "~/components/ui/button"
 import { HelpTicketPreview } from "~/components/help-ticket-preview"
 import { Separator } from "~/components/ui/separator"
 import {
-  Select,
+	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger
@@ -41,13 +41,15 @@ import { Loader2, Type } from "lucide-react"
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
+	console.log(data)
 
 	switch (request.method) {
 		case "POST":
 			const newTicket = {
-				...data,
-				company_id: JSON.parse(data.company_id)
-			} as z.infer<typeof ticketSchema>
+				title: data.title,
+				content: data.content,
+				company_id: data.company_id === "null" ? null : data.company_id
+			}
 
 			await fetchData("ticket", {
 				method: "POST",
