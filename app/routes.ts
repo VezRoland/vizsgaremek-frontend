@@ -16,7 +16,6 @@ export default [
 		route("employees", "routes/employees/employees.tsx", [
 			route(":userId", "routes/employees/edit-employee.tsx")
 		]),
-    route("companies", "routes/companies/companies.tsx"),
 		...prefix("training", [
 			index("routes/training/overview.tsx"),
 			route("test/:testId", "routes/training/training.tsx"),
@@ -28,6 +27,7 @@ export default [
 			route(":ticketId", "routes/help/help-ticket.tsx")
 		])
 	]),
+  route("settings", "routes/settings.tsx"),
 	layout("routes/auth/layout.tsx", [
 		route("sign-in", "routes/auth/sign-in.tsx"),
 		layout("routes/auth/sign-up-layout.tsx", [

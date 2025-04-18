@@ -9,7 +9,7 @@ import {
 import type { Route } from "./+types/edit-employee"
 import { UserRole, type User } from "~/types/database"
 import { Button } from "~/components/ui/button"
-import { redirect, useNavigate, useSubmit } from "react-router"
+import { redirect, useNavigate, useSearchParams, useSubmit } from "react-router"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { editEmployeeSchema } from "~/schemas/management"
@@ -51,10 +51,10 @@ export async function clientLoader({
 	return response?.data!
 }
 
-export default function Employee({ loaderData }: Route.ComponentProps) {
+export default function Employee({ loaderData: employee }: Route.ComponentProps) {
 	const submit = useSubmit()
 	const navigate = useNavigate()
-	const employee = loaderData
+  const searchParams = useSearchParams()
 
 	const form = useForm<z.infer<typeof editEmployeeSchema>>({
 		resolver: zodResolver(editEmployeeSchema),
@@ -74,7 +74,7 @@ export default function Employee({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<Dialog
-			onOpenChange={open => (!open ? navigate("/employees") : null)}
+			onOpenChange={open => (!open ? navigate(`/employees?${searchParams[0].toString()}`) : null)}
 			defaultOpen={true}
 		>
 			<DialogContent>

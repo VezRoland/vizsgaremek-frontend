@@ -32,7 +32,7 @@ export default function MobileNavbar({
 	const user = useUserContext()
 
 	return (
-		<nav className="sticky top-0 left-0 max-w-full flex justify-between p-4 border-b bg-background/25 backdrop-blur-md">
+		<nav className="z-50 sticky top-0 left-0 max-w-full flex justify-between p-4 border-b bg-background/25 backdrop-blur-md">
 			<img className="h-9" src="/favicon.ico" alt="Logo" />
 			<Drawer direction="right">
 				<DrawerTrigger asChild>
