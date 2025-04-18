@@ -10,6 +10,7 @@ import {
 } from "../ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import ActionLoadingWrapper from "../action-loading-wrapper"
+import { useNavigate } from "react-router"
 
 export default function DesktopNavbar({
 	routes,
@@ -18,6 +19,7 @@ export default function DesktopNavbar({
 	routes: Route[]
 	onSignOut: () => void
 }) {
+	const navigate = useNavigate()
 	const user = useUserContext()
 
 	return (
@@ -25,7 +27,7 @@ export default function DesktopNavbar({
 			<img className="h-9" src="/favicon.ico" alt="Logo" />
 			<ul className="flex justify-center">
 				{routes.map(route => (
-					<li>
+					<li key={route.name}>
 						<NavbarItem {...route} />
 					</li>
 				))}
@@ -33,17 +35,18 @@ export default function DesktopNavbar({
 			<DropdownMenu>
 				<DropdownMenuTrigger className="w-max ml-auto">
 					<Avatar className="w-8 h-8">
-						<AvatarImage />
+						<AvatarImage src={user.avatar_url} />
 						<AvatarFallback>
 							{user.name.substring(0, 1).toLocaleUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
+					<DropdownMenuItem onClick={() => navigate("/settings")}>
+						Settings
+					</DropdownMenuItem>
 					<ActionLoadingWrapper type="DELETE">
-						<DropdownMenuItem onClick={onSignOut}>
-							Sign out
-						</DropdownMenuItem>
+						<DropdownMenuItem onClick={onSignOut}>Sign out</DropdownMenuItem>
 					</ActionLoadingWrapper>
 				</DropdownMenuContent>
 			</DropdownMenu>

@@ -1,6 +1,7 @@
 export interface User {
 	id: string
 	name: string
+  avatar_url: string
 	age?: number
 	hourlyWage?: number
 	role: UserRole

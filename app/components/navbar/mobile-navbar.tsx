@@ -21,6 +21,7 @@ import {
 } from "../ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import ActionLoadingWrapper from "../action-loading-wrapper"
+import { useNavigate } from "react-router"
 
 export default function MobileNavbar({
 	routes,
@@ -29,6 +30,7 @@ export default function MobileNavbar({
 	routes: Route[]
 	onSignOut: () => void
 }) {
+	const navigate = useNavigate()
 	const user = useUserContext()
 
 	return (
@@ -51,20 +53,23 @@ export default function MobileNavbar({
 					</DrawerHeader>
 					<ul className="flex flex-col p-4">
 						{routes.map(route => (
-							<NavbarItem {...route} />
+							<NavbarItem key={route.name} {...route} />
 						))}
 					</ul>
 					<DrawerFooter className="flex-row justify-between border-t">
 						<DropdownMenu>
 							<DropdownMenuTrigger className="w-max">
 								<Avatar className="w-8 h-8">
-									<AvatarImage />
+									<AvatarImage src={user.avatar_url} />
 									<AvatarFallback>
 										{user.name.substring(0, 1).toLocaleUpperCase()}
 									</AvatarFallback>
 								</Avatar>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
+								<DropdownMenuItem onClick={() => navigate("/settings")}>
+									Settings
+								</DropdownMenuItem>
 								<ActionLoadingWrapper type="DELETE">
 									<DropdownMenuItem onClick={onSignOut}>
 										Sign out

@@ -37,7 +37,6 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const response = await fetchData<{ pagination: TPagination; users: User[] }>(
 		`company/users?page=${page}`
 	)
-	console.log(response)
 	return response?.data
 }
 
@@ -74,7 +73,7 @@ export default function Employees({ loaderData }: Route.ComponentProps) {
 						</TableHeader>
 						<TableBody>
 							{loaderData?.users.map(user => (
-								<TableRow>
+								<TableRow key={user.id}>
 									<TableCell>{user.name}</TableCell>
 									<TableCell>{user.age || "-"}</TableCell>
 									<TableCell>{user.hourlyWage ?? "-"}</TableCell>
@@ -93,7 +92,9 @@ export default function Employees({ loaderData }: Route.ComponentProps) {
 												<DropdownMenuItem
 													onClick={() =>
 														navigate(
-															`/employees/${user.id}?${searchParams[0].toString()}`
+															`/employees/${
+																user.id
+															}?${searchParams[0].toString()}`
 														)
 													}
 												>
@@ -120,7 +121,7 @@ export default function Employees({ loaderData }: Route.ComponentProps) {
 								0
 							)
 						}).map((_, page) => (
-							<PaginationItem>
+							<PaginationItem key={page}>
 								<PaginationLink
 									to={`/employees?page=${page + 1}`}
 									isActive={loaderData?.pagination.currentPage === page + 1}
