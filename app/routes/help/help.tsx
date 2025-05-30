@@ -39,6 +39,13 @@ import {
 import { SelectValue } from "@radix-ui/react-select"
 import { Loader2, Type } from "lucide-react"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Help" },
+    { name: "description", content: "Create a new help ticket or manage existing ones" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
 	console.log(data)

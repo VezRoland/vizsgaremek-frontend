@@ -37,6 +37,13 @@ import {
 import { useEffect, type ChangeEvent } from "react"
 import { FileUpload } from "~/components/training/file-upload"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Create Training" },
+    { name: "description", content: "Create training tests" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const formData = await request.formData()
 	return fetchData("training", {

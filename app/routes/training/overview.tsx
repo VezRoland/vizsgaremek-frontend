@@ -22,6 +22,13 @@ import {
 } from "~/components/ui/dropdown-menu"
 import { Badge } from "~/components/ui/badge"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Trainings" },
+    { name: "description", content: "View all the available training tests" }
+  ]
+}
+
 export async function clientLoader() {
 	const tests = (await fetchData<TrainingPreview[]>("training"))?.data || []
 	const submissions =

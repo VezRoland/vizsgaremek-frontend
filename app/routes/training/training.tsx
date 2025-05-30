@@ -28,6 +28,13 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
 import { Checkbox } from "~/components/ui/checkbox"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Training" },
+    { name: "description", content: "Fill out the training test" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
 

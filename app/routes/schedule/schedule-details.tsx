@@ -41,8 +41,8 @@ import {
 
 export function meta({}: Route.MetaArgs) {
 	return [
-		{ title: "Edit Schedule" },
-		{ name: "description", content: "Edit a specific schedule" }
+		{ title: "Edit Shift" },
+		{ name: "description", content: "Edit a specific work shift" }
 	]
 }
 

@@ -32,6 +32,13 @@ import {
 } from "~/components/ui/select"
 import { fetchData } from "~/lib/utils"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Edit Employee" },
+    { name: "description", content: "Edit the data of an employee" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.json()
 	await fetchData(`company/user/${data.id}`, {

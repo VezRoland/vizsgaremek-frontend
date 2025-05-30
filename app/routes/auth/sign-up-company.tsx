@@ -28,6 +28,13 @@ import { Button } from "~/components/ui/button"
 import { TabsContent } from "~/components/ui/tabs"
 import { Building2, KeyRound, Loader2, Mail, UserRound } from "lucide-react"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Company Sign Up" },
+    { name: "description", content: "Sign up your company" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signUpCompanySchema>
 

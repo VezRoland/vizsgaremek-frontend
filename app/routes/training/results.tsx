@@ -7,6 +7,13 @@ import { Card, CardHeader, CardTitle } from "~/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
 import { Checkbox } from "~/components/ui/checkbox"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Test Results" },
+    { name: "description", content: "View your results" }
+  ]
+}
+
 export function clientLoader({ params: { testId } }: Route.ClientLoaderArgs) {
 	return fetchData<TrainingResult[]>(`training/results?testId=${testId}`, {
 		validate: true

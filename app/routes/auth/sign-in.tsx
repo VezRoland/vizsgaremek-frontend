@@ -27,6 +27,13 @@ import { Button } from "~/components/ui/button"
 import { KeyRound, Loader2, Mail } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Sign In" },
+    { name: "description", content: "Sign into your account" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signInSchema>
 

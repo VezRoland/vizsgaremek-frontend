@@ -34,6 +34,13 @@ import {
 	UserRound
 } from "lucide-react"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Employee Sign Up" },
+    { name: "description", content: "Sign up as an employee" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ActionArgs) {
 	const fields = (await request.json()) as z.infer<typeof signUpEmployeeSchema>
 

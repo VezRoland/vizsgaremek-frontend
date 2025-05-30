@@ -3,8 +3,8 @@ import type { Route } from "../+types/root"
 
 export function meta({}: Route.MetaArgs) {
 	return [
-		{ title: "New React Router App" },
-		{ name: "description", content: "Welcome to React Router!" }
+		{ title: "Home" },
+		{ name: "description", content: "Welcome to the home page of NexusOPS!" }
 	]
 }
 

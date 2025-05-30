@@ -40,6 +40,13 @@ interface HelpTicket extends Ticket {
 	responses: TicketResponse[]
 }
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Help Ticket" },
+    { name: "description", content: "View the details of a help ticket" }
+  ]
+}
+
 export async function clientAction({
 	request,
 	params: { ticketId }

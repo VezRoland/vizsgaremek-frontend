@@ -24,6 +24,13 @@ import { avatarSchema, profileSchema } from "~/schemas/settings"
 import type { Route } from "./+types/settings"
 import { useSubmit } from "react-router"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Settings" },
+    { name: "description", content: "Settings page of NexusOPS" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data = await request.formData()
 

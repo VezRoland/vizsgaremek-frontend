@@ -9,7 +9,7 @@ import { fetchData } from "~/lib/utils"
 export function meta({}: Route.MetaArgs) {
 	return [
 		{ title: "Schedule" },
-		{ name: "description", content: "Manage your company's schedule" }
+		{ name: "description", content: "Manage your company's work shift schedule" }
 	]
 }
 

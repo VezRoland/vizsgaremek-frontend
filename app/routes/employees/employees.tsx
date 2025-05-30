@@ -26,6 +26,13 @@ import {
 	PaginationLink
 } from "~/components/ui/pagination"
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Employees" },
+    { name: "description", content: "View or manage employees" }
+  ]
+}
+
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const { id } = await request.json()
 	await fetchData(`company/verify/${id}`, { method: "PATCH" })
