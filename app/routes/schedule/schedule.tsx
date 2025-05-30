@@ -21,6 +21,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 			validate: true
 		}
 	)
+  console.log(schedule?.data)
 	return {
 		schedule: schedule?.data,
 		days: schedule?.data
