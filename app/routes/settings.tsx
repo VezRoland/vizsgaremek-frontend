@@ -133,6 +133,11 @@ export default function Settings() {
 								className="flex flex-col gap-2"
 								onSubmit={profileForm.handleSubmit(handleProfileSubmit)}
 							>
+								{user.company_code && (
+									<p>
+										Company code: <b>{user.company_code}</b>
+									</p>
+								)}
 								<FormField
 									control={profileForm.control}
 									name="name"

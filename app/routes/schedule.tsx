@@ -115,8 +115,7 @@ export default function Schedule({
 	let date = new Date()
 	date = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000)
 	date.setUTCHours(0, 0, 0, 0)
-
-  console.log(loaderData)
+  
 	useEffect(() => handleServerResponse(actionData), [actionData])
 
 	return (
