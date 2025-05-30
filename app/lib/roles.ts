@@ -31,7 +31,7 @@ const ROLES = {
 			create: false,
 			delete: (_, data) => data.company_id === null,
 			close: (_, data) => data.company_id === null,
-			respond: (_, data) => data.company_id === null,
+			respond: (_, data) => data.company_id === null && !data.closed,
 		}
 	},
 	[UserRole.Owner]: {
@@ -40,7 +40,7 @@ const ROLES = {
 			create: true,
 			delete: (user, data) => user.company_id === data.company_id,
 			close: (user, data) => user.company_id === data.company_id,
-			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+			respond: (user, data) => (user.id === data.user_id || user.company_id === data.company_id) && !data.closed,
 		},
     schedules: {
       view: true,
@@ -55,7 +55,7 @@ const ROLES = {
 			create: true,
 			delete: (user, data) => user.company_id === data.company_id,
 			close: (user, data) => user.company_id === data.company_id,
-			respond: (user, data) => user.id === data.user_id || user.company_id === data.company_id,
+			respond: (user, data) => (user.id === data.user_id || user.company_id === data.company_id) && !data.closed,
 		},
     schedules: {
       view: true,
@@ -70,7 +70,7 @@ const ROLES = {
 			create: true,
 			delete: false,
 			close: false,
-			respond: (user, data) => user.id === data.user_id,
+			respond: (user, data) => user.id === data.user_id && !data.closed,
 		},
     schedules: {
       view: true,
