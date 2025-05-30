@@ -1,9 +1,5 @@
 import { useNavigate, useSearchParams, useSubmit } from "react-router"
-import {
-	cn,
-	fetchData,
-	useUserContext
-} from "~/lib/utils"
+import { cn, fetchData, useUserContext } from "~/lib/utils"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { z } from "zod"
@@ -58,7 +54,11 @@ export function meta({}: Route.MetaArgs) {
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
 	const data: FormData = await request.json()
-	return fetchData("schedule", { method: "POST", body: data })
+	return fetchData("schedule", {
+		method: "POST",
+		body: JSON.stringify(data),
+		headers: { "Content-Type": "application/json" }
+	})
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -72,7 +72,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	const [searchParams] = useSearchParams()
 	const user = useUserContext()
 
-  const data = loaderData?.data
+	const data = loaderData?.data
 
 	const form = useForm<FormData>({
 		resolver: zodResolver(scheduleSchema),
@@ -80,7 +80,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 			start: new Date(searchParams.get("weekStart") || new Date()),
 			end: new Date(searchParams.get("weekStart") || new Date()),
 			category: "1",
-			user_id: user.role === UserRole.Employee ? JSON.stringify([user.id]) : ""
+			userId: user.role === UserRole.Employee ? JSON.stringify([user.id]) : ""
 		}
 	})
 
@@ -88,9 +88,9 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 		await submit(
 			JSON.stringify({
 				...values,
-				user_id: [...JSON.parse(values.user_id)],
+				userIds: [...JSON.parse(values.userId)],
 				category: parseInt(values.category),
-				company_id: user.company_id
+				companyId: user.company_id
 			}),
 			{
 				method: "POST",
@@ -102,9 +102,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 	return (
 		<Dialog
 			onOpenChange={open =>
-				!open
-					? navigate(`/schedule?${searchParams.toString()}`)
-					: null
+				!open ? navigate(`/schedule?${searchParams.toString()}`) : null
 			}
 			defaultOpen={true}
 		>
@@ -163,19 +161,17 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 								<>
 									<div className="flex gap-2">
 										{user.role === UserRole.Employee ? (
-											<input type="hidden" {...form.register("user_id")} />
+											<input type="hidden" {...form.register("userId")} />
 										) : (
 											<FormField
 												control={form.control}
-												name="user_id"
+												name="userId"
 												render={() => (
 													<FormItem className="flex-1 flex-col">
 														<FormControl>
 															<UserSearch
 																data={data?.users}
-																pageLimit={
-																	data?.pagination?.totalPages
-																}
+																pageLimit={data?.pagination?.totalPages}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -222,7 +218,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 									{user.role !== UserRole.Employee && (
 										<UserInput
 											onValueChange={value => {
-												form.setValue("user_id", value)
+												form.setValue("userId", value)
 											}}
 										/>
 									)}
@@ -243,10 +239,7 @@ export default function NewSchedule({ loaderData }: Route.ComponentProps) {
 								Add
 							</Button>
 							<DialogClose>
-								<Button
-									type="button"
-									variant="outline"
-								>
+								<Button type="button" variant="outline">
 									Cancel
 								</Button>
 							</DialogClose>
