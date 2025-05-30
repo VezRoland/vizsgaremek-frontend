@@ -26,7 +26,7 @@ const DAYS = [
 	"Sunday"
 ]
 
-export function ScheduleTable({ data, weekStart }: { data: ScheduleWeek | undefined, weekStart: number | undefined }) {
+export function ScheduleTable({ data, days }: { data: ScheduleWeek | undefined, days: string[] | undefined }) {
 	const [searchParams, setSearchParams] = useSearchParams()
 
 	function setWeekStart(weekStart: string) {
@@ -43,6 +43,8 @@ export function ScheduleTable({ data, weekStart }: { data: ScheduleWeek | undefi
 			return prevParams
 		})
 	}
+
+  console.log(days)
 
 	return (
 		<ScheduleContext.Provider value={data}>
@@ -100,14 +102,9 @@ export function ScheduleTable({ data, weekStart }: { data: ScheduleWeek | undefi
 									<th className="w-32 p-2 border border-accent" key={day}>
 										<span>{day}</span>
 										<br />
-										{weekStart && (
+										{days && (
 											<span className="font-normal">
-												{new Date(
-													weekStart + (i + 1) * DAY
-												).toLocaleDateString(undefined, {
-													month: "2-digit",
-													day: "2-digit"
-												})}
+												{days[i]}
 											</span>
 										)}
 									</th>

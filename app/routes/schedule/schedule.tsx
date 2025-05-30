@@ -23,20 +23,28 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	)
 	return {
 		schedule: schedule?.data,
-		weekStart: schedule?.data
-			? new Date(schedule.data.weekStart).getTime()
+		days: schedule?.data
+			? Array.from({ length: 7 }).map((_, i) => {
+					return new Date(
+						new Date(schedule.data!.weekStart).getTime() +
+							(i + 1) * (24 * 60 * 60 * 1000)
+					).toLocaleDateString(undefined, {
+						month: "2-digit",
+						day: "2-digit"
+					})
+			  })
 			: undefined
 	}
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {
-	const { schedule, weekStart } = loaderData
+	const { schedule, days } = loaderData
 
 	return (
 		<>
 			<Outlet />
 			<main className="h-[calc(100vh-69px)] p-4">
-				<ScheduleTable data={schedule!} weekStart={weekStart} />
+				<ScheduleTable data={schedule!} days={days} />
 			</main>
 		</>
 	)
