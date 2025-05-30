@@ -11,13 +11,10 @@ export const avatarSchema = object({
 		)
 })
 
-export const nameSchema = object({
+export const profileSchema = object({
 	name: string({ message: "Name is required" })
 		.min(1, "Name is required")
-		.max(150, "Name is too long (max. 150 characters)")
-})
-
-export const ageSchema = object({
+		.max(150, "Name is too long (max. 150 characters)"),
 	age: coerce
 		.number({
 			required_error: "Age is required",

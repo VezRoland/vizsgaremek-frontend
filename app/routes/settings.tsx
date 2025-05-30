@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { fetchData, useUserContext } from "~/lib/utils"
-import { ageSchema, avatarSchema, nameSchema } from "~/schemas/settings"
+import { avatarSchema, profileSchema } from "~/schemas/settings"
 import type { Route } from "./+types/settings"
 import { useSubmit } from "react-router"
 
@@ -29,25 +29,24 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 	switch (data.get("type")) {
 		case "avatar":
-			return await fetchData("user/avatar", {
+			await fetchData("user/avatar", {
 				method: "POST",
 				headers: {
 					"Cache-Control": "no-cache"
 				},
 				body: data
 			})
-		case "name":
-			return await fetchData("user/name", {
+			break
+		case "profile":
+			await fetchData("user/profile", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: data.get("name") })
+				body: JSON.stringify({
+					name: data.get("name"),
+					age: parseInt(data.get("age") as string)
+				})
 			})
-		case "age":
-			return await fetchData("user/age", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ age: parseInt(data.get("age") as string) })
-			})
+			break
 	}
 
 	fetchData("auth/user", {
@@ -65,14 +64,9 @@ export default function Settings() {
 		defaultValues: { avatar: undefined }
 	})
 
-	const nameForm = useForm<z.infer<typeof nameSchema>>({
-		resolver: zodResolver(nameSchema),
-		defaultValues: { name: user.name }
-	})
-
-	const ageForm = useForm<z.infer<typeof ageSchema>>({
-		resolver: zodResolver(ageSchema),
-		defaultValues: { age: user.age }
+	const profileForm = useForm<z.infer<typeof profileSchema>>({
+		resolver: zodResolver(profileSchema),
+		defaultValues: { name: user.name, age: user.age }
 	})
 
 	function handleAvatarSubmit(values: z.infer<typeof avatarSchema>) {
@@ -85,20 +79,11 @@ export default function Settings() {
 		})
 	}
 
-	function handleNameSubmit(values: z.infer<typeof nameSchema>) {
+	function handleProfileSubmit(values: z.infer<typeof profileSchema>) {
 		const formData = new FormData()
-		formData.append("type", "name")
+		formData.append("type", "profile")
 		formData.append("name", values.name)
-		submit(formData, {
-			method: "POST",
-			encType: "multipart/form-data"
-		})
-	}
-
-	function handleAgeSubmit(values: z.infer<typeof ageSchema>) {
-		const formData = new FormData()
-		formData.append("type", "age")
-		formData.append("age", values.age.toString())
+		formData.append("age", JSON.stringify(values.age))
 		submit(formData, {
 			method: "POST",
 			encType: "multipart/form-data"
@@ -143,58 +128,46 @@ export default function Settings() {
 								/>
 							</form>
 						</Form>
-						<Form {...nameForm}>
+						<Form {...profileForm}>
 							<form
-								className="flex gap-2"
-								onSubmit={nameForm.handleSubmit(handleNameSubmit)}
+								className="flex flex-col gap-2"
+								onSubmit={profileForm.handleSubmit(handleProfileSubmit)}
 							>
 								<FormField
-									control={nameForm.control}
+									control={profileForm.control}
 									name="name"
 									render={({ field }) => (
-										<FormItem className="w-full">
-											<div className="flex gap-2">
-												<FormControl>
-													<Input
-														className="flex-1"
-														icon={<UserRound />}
-														placeholder="Full Name"
-														{...field}
-													/>
-												</FormControl>
-												<Button type="submit">Apply</Button>
-											</div>
+										<FormItem>
+											<FormControl>
+												<Input
+													icon={<UserRound />}
+													placeholder="Full Name"
+													{...field}
+												/>
+											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
-							</form>
-						</Form>
-						<Form {...ageForm}>
-							<form
-								className="flex gap-2"
-								onSubmit={ageForm.handleSubmit(handleAgeSubmit)}
-							>
 								<FormField
-									control={ageForm.control}
+									control={profileForm.control}
 									name="age"
 									render={({ field }) => (
-										<FormItem className="w-full">
-											<div className="flex gap-2">
-												<FormControl>
-													<Input
-														className="flex-1"
-														icon={<CalendarIcon />}
-														placeholder="Age"
-														{...field}
-													/>
-												</FormControl>
-												<Button type="submit">Apply</Button>
-											</div>
+										<FormItem>
+											<FormControl>
+												<Input
+													icon={<CalendarIcon />}
+													placeholder="Age"
+													{...field}
+												/>
+											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
+								<Button className="ml-auto" type="submit">
+									Apply
+								</Button>
 							</form>
 						</Form>
 					</div>
