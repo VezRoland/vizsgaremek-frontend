@@ -130,7 +130,7 @@ export default function Employee({ loaderData: employee }: Route.ComponentProps)
 													{Object.entries(UserRole).map(
 														([key, value]) =>
 															isNaN(parseInt(key)) &&
-															value !== UserRole.Admin && (
+															value !== UserRole.Admin && value !== UserRole.Owner && (
 																<SelectItem
 																	key={value}
 																	value={value.toString()}

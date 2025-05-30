@@ -83,7 +83,7 @@ export default function Employees({ loaderData }: Route.ComponentProps) {
 								<TableRow key={user.id}>
 									<TableCell>{user.name}</TableCell>
 									<TableCell>{user.age || "-"}</TableCell>
-									<TableCell>{user.hourlyWage ?? "-"}</TableCell>
+									<TableCell>{user.hourly_wage ?? "-"}</TableCell>
 									<TableCell>{UserRole[user.role]}</TableCell>
 									<TableCell>
 										{user.verified ? "Verified" : "Unverified"}
