@@ -15,19 +15,28 @@ export function meta({}: Route.MetaArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 	const { searchParams } = new URL(request.url)
-	return fetchData<ScheduleWeek>(`schedule?${searchParams.toString()}`, {
-		validate: true
-	})
+	const schedule = await fetchData<ScheduleWeek>(
+		`schedule?${searchParams.toString()}`,
+		{
+			validate: true
+		}
+	)
+	return {
+		schedule: schedule?.data,
+		weekStart: schedule?.data
+			? new Date(schedule.data.weekStart).getTime()
+			: undefined
+	}
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {
-  const data = loaderData?.data
+	const { schedule, weekStart } = loaderData
 
 	return (
 		<>
 			<Outlet />
 			<main className="h-[calc(100vh-69px)] p-4">
-				<ScheduleTable data={data!} />
+				<ScheduleTable data={schedule!} weekStart={weekStart} />
 			</main>
 		</>
 	)

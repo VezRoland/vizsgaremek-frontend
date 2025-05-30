@@ -26,7 +26,7 @@ const DAYS = [
 	"Sunday"
 ]
 
-export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
+export function ScheduleTable({ data, weekStart }: { data: ScheduleWeek | undefined, weekStart: number | undefined }) {
 	const [searchParams, setSearchParams] = useSearchParams()
 
 	function setWeekStart(weekStart: string) {
@@ -100,10 +100,10 @@ export function ScheduleTable({ data }: { data: ScheduleWeek | undefined }) {
 									<th className="w-32 p-2 border border-accent" key={day}>
 										<span>{day}</span>
 										<br />
-										{data && (
+										{weekStart && (
 											<span className="font-normal">
 												{new Date(
-													new Date(data.weekStart).getTime() + (i + 1) * DAY
+													weekStart + (i + 1) * DAY
 												).toLocaleDateString(undefined, {
 													month: "2-digit",
 													day: "2-digit"
